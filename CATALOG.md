@@ -5,7 +5,7 @@ no second component trees or root command aliases. Follow [INSTALL.md](INSTALL.m
 when copying a subset: a skill folder can contain required assets, and scaffold
 tools resolve templates relative to their own file location.
 
-## Seven skills
+## Eight skills
 
 Skills are instructions for an assistant, not standalone executables. Outputs
 below are workflow artifacts; the main session saves model-returned text.
@@ -19,8 +19,9 @@ below are workflow artifacts; the main session saves model-returned text.
 | [review-against-notes](plugins/research-kit/skills/review-against-notes/SKILL.md) | Draft and literature notes → dated review report | `verify-quotes`, `check-claims`, `claim-checker`, `skeptic`; `check-bib` is a useful separate check, not included in this skill's sequence |
 | [paper-build](plugins/research-kit/skills/paper-build/SKILL.md) | `10_paper/paper.md`, metadata, bibliography → bibliography findings, PDF, HTML or DOCX, log | `check-bib`, `build-paper`, Python 3.9+, pandoc; optional Typst/XeLaTeX; use on a prepared draft |
 | [analysis-pipeline](plugins/research-kit/skills/analysis-pipeline/SKILL.md) | Pipeline target, language and data → pipeline skeleton, run report, figures/tables | `new-pipeline`, matching templates, `pipeline-runner`, Python or R; optional `uv`/`renv`; trust project code before execution |
+| [tribunal](plugins/research-kit/skills/tribunal/SKILL.md) | A costly artifact or decision → sealed multi-lens review, verbatim transcript, `report.md` in `tribunals/<date>-<slug>/` | `tribunal-scribe`, `tribune`, `refuter`, Python 3.9+, git; for high-stakes calls only, not routine edits; the panel procedure is instructions, the record tool is the part that runs |
 
-## Four agent roles
+## Six agent roles
 
 These are Claude-format role contracts. Copying them to another assistant does
 not automatically configure its permissions or model. See [adapters](docs/adapters.md).
@@ -30,12 +31,13 @@ not automatically configure its permissions or model. See [adapters](docs/adapte
 | [source-reader](plugins/research-kit/agents/source-reader.md) | One source path, citekey, optional scope → one note with claims and page-pinned quotes | Read-only source access; literature-notes `template.md`; caller saves and runs `verify-quotes` |
 | [claim-checker](plugins/research-kit/agents/claim-checker.md) | Draft, cited sentences/keys, notes → supported/partial/not-supported/not-assessed rows and counts | Read-only draft/notes; judges notes only, not outside knowledge or source files |
 | [skeptic](plugins/research-kit/agents/skeptic.md) | Draft and notes → evidence-anchored objections to three strongest claims | Read-only draft/notes; use after mechanical and support checks |
+| [tribune](plugins/research-kit/agents/tribune.md) | Artifact path, frozen hash and one lens → verdict with severity-ranked, evidence-backed findings | Read-only; used by the `tribunal` skill in panels of at least three distinct lenses |
+| [refuter](plugins/research-kit/agents/refuter.md) | One finding and artifact paths → REFUTED, STANDS or UNVERIFIABLE with evidence | Read-only, no shell; one finding per call; used by the `tribunal` skill |
 | [pipeline-runner](plugins/research-kit/agents/pipeline-runner.md) | Trusted pipeline directory → PASS/FAIL, warnings, changed outputs | Read and shell execution; Python or R, optional `uv`; no agent edits, but executed pipeline writes outputs |
 
-## Eight tools
+## Eleven tools
 
-Seven are Python 3.9+ programs (standard library only);
-All helpers are Python 3.9+. Each supports `--help`. Invoke by explicit path
+All helpers are Python 3.9+ programs (standard library only). Each supports `--help`. Invoke by explicit path
 from the working directory indicated in [INSTALL.md](INSTALL.md).
 
 | Tool | Inputs → outputs | Dependencies and selective use |
@@ -48,6 +50,9 @@ from the working directory indicated in [INSTALL.md](INSTALL.md).
 | [check-bib](plugins/research-kit/bin/check-bib) | Bibliography and draft → duplicate/missing-field/DOI/citation findings | Python; offline; syntax/coverage checks do not verify bibliographic truth |
 | [build-paper](plugins/research-kit/bin/build-paper) | Paper directory with Markdown and optional metadata → PDF/HTML/DOCX and `build.log` | Python 3.9+, pandoc, optional Typst/XeLaTeX and `pdftotext`; guard checks unresolved citations, missing files and `???`; avoid `--soft` for final validation |
 | [new-pipeline](plugins/research-kit/bin/new-pipeline) | Empty target and `--lang python` or `--lang r` → copied pipeline | Python to scaffold; `templates/pipeline/` sibling to `bin/`; Python or R to execute result |
+| [check-docx](plugins/research-kit/bin/check-docx) | Word file, notes root and a quote-to-source mapping → inventory CSV and bindings check | Python; offline; see the [Word workflow](docs/word.md) |
+| [doctor](plugins/research-kit/bin/doctor) | Workflow name (`pdf`, `build`, `word`, `all`) → read-only setup diagnostics | Python; see [doctor](docs/doctor.md) |
+| [tribunal-scribe](plugins/research-kit/bin/tribunal-scribe) | Tribunal workspace and per-turn payload files → verbatim, hash-chained `transcript.md` | Python and git (inside a git repository); only writer of the tribunal record; `verify` checks local consistency, `--expect-head` a retained head |
 
 ## Templates and examples
 

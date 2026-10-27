@@ -11,6 +11,9 @@ In PowerShell use `py -3 "C:\path\to\research-kit\bin\doctor" --workflow word`.
 If Python cannot start, select/install Python 3.9+ first; no Python program can
 diagnose an interpreter that cannot parse or launch it.
 
+Missing tools? [`scripts/install-deps.sh` / `.ps1`](../INSTALL.md#install-the-external-tools-one-command)
+install them and finish by running `doctor`.
+
 ## Workflows and results
 
 | Workflow | Required external tools |
@@ -46,6 +49,13 @@ Finding IDs: `python.too-old`, `pdftotext.missing`, `pdftotext.unusable`,
 Package suggestions include winget/choco, brew, and apt/dnf alternatives; these
 are proposals, not commands executed by doctor. Use only an already permitted
 package manager and existing rights; never escalate privileges.
+
+## Install missing tools
+
+`scripts/install-deps.sh` (macOS, Debian/Ubuntu, Fedora) and `scripts/install-deps.ps1`
+(Windows) install the missing tools using the package names above, ask before running,
+and finish by rerunning doctor. Use `--dry-run` / `-DryRun` to preview, `--typst` /
+`-Typst` for the optional Typst engine, `--workflow pdf|build|all` to limit scope.
 
 ## Read-only boundaries
 

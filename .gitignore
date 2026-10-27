@@ -3,3 +3,6 @@ __pycache__/
 .venv/
 .DS_Store
 .pytest_cache/
+site/fonts/
+site/transcript-*.svg
+site/demo-*.svg

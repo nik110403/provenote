@@ -59,6 +59,14 @@ jobs:
           fi
       - name: Documented smoke
         run: python scripts/smoke.py
+      - name: Installer dry-run (Unix)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: bash scripts/install-deps.sh --dry-run --typst
+      - name: Installer dry-run (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./scripts/install-deps.ps1 -DryRun -Typst
       - name: Unit tests
         run: python -m unittest discover -s tests -v
       - name: Unix static checks

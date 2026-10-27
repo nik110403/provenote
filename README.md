@@ -1,42 +1,45 @@
 <p><picture><source media="(prefers-color-scheme: dark)" srcset="assets/banner-dark.svg"><img src="assets/banner-light.svg" alt="research-kit" width="100%"></picture></p>
 
+[![CI](https://github.com/nik110403/research-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/nik110403/research-kit/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-8c2f1b?style=flat)](LICENSE) [![Plugin version](https://img.shields.io/badge/plugin-0.1.3-57534e?style=flat)](CHANGELOG.md)
+
 **Turn a reading list into source-grounded notes, check a draft against them, and build a paper.**
+
+- Reading list to notes, with every quote checked against its page in the source.
+- A draft checked against those notes: uncited and unverified claims are flagged.
+- A paper built as PDF, HTML or DOCX, after a bibliography check.
+
+No API key, no server: it runs inside the assistant you already use (Claude Code, or
+Codex through an adapter). Early-stage, version 0.1.3.
 
 [Catalog](CATALOG.md) · [Install guide](INSTALL.md) · [Workflow](docs/workflow.md) · [Lecture quickstart](docs/lecture.md) · [What is verified](docs/verification.md) · [Changelog](CHANGELOG.md)
 
-[![License: MIT](https://img.shields.io/badge/license-MIT-8c2f1b?style=flat)](LICENSE) [![Plugin version](https://img.shields.io/badge/plugin-0.1.3-57534e?style=flat)](CHANGELOG.md)
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="assets/transcript-dark.svg"><img src="assets/transcript-light.svg" alt="Terminal transcript: verify-quotes passes 14 real quotations and rejects a planted fabrication" width="100%"></picture>
-
-Early-stage plugin **0.1.3**: 7 skills, 4 agent roles, 8 command-line tools and
-project, Python and R templates. Install the Claude Code plugin, or the documented
-Codex adapter into one project. The skills and roles are Markdown instructions; the
-helpers are eight Python programs. Reading a skill does not execute a tool.
-
 ## Install
+
+In Claude Code (Git must be installed to download the plugin this way; the
+[ZIP route](INSTALL.md#codex-adapter) needs none):
 
 ```text
 /plugin marketplace add nik110403/research-kit
 /plugin install research-kit@research-kit
 ```
 
-Then ask Claude to start a research project, search the literature, or verify notes.
-Command-line dependencies still need to be available; see [INSTALL.md](INSTALL.md)
-for tool paths, selective installation and existing-settings precautions.
+Reading or loading a skill does not execute any tool by itself; tools run only when the
+assistant calls them.
 
-For Codex, from this checkout run `python3 scripts/install-codex.py --project
-/absolute/path/to/project` (PowerShell: `python .\scripts\install-codex.py --project
-C:\path\to\project`). This copies one local skill to
-`.agents/skills/research-kit/`; it is an adapter with tested installation and local
-helpers, not evidence of live Codex discovery or imported Claude permissions.
+Check your setup: run `doctor` ([how](docs/doctor.md)). Missing `pdftotext` or `pandoc`?
+Run `scripts/install-deps.sh` (macOS/Linux) or `scripts/install-deps.ps1` (Windows);
+details in [INSTALL.md](INSTALL.md#install-the-external-tools-one-command). Then ask Claude to start a research project,
+search the literature, or verify notes.
 
-Checking typed quotations in a saved Word lecture needs neither Zotero nor
-prewritten notes: inventory quotations, explicitly map each CSV row to its
-source Markdown file and page, then run the bindings check. See the
-[Word check guide](docs/word.md) for commands, the reproducible demo, and the
-scope of that result.
+<picture><source media="(prefers-color-scheme: dark)" srcset="assets/demo-dark.svg"><img src="assets/demo-light.svg" alt="Animated terminal demo of a real Claude Code run on a small example project: verify-quotes passes the six real quotes of one note and fails a planted fabricated quote, check-claims flags a draft sentence with an invented quote and an uncited quotation, and Claude lists which draft sentences the notes do not back." width="100%"></picture>
 
-## What you get
+**Other routes:** [Codex adapter](INSTALL.md#codex-adapter), including a ZIP and
+file-manager route that needs no Git, Python or terminal ·
+[create your own skill](docs/create-your-own.md) ·
+[check quotes in a saved Word lecture](docs/word.md) without Zotero or notes.
+
+<details>
+<summary>What's inside: 8 skills, 6 roles, 11 tools</summary>
 
 | Kind | Name | What it does |
 |---|---|---|
@@ -47,9 +50,12 @@ scope of that result.
 | Skill | [review-against-notes](plugins/research-kit/skills/review-against-notes/SKILL.md) | Review a draft against the notes |
 | Skill | [paper-build](plugins/research-kit/skills/paper-build/SKILL.md) | Check the bibliography and build PDF or HTML |
 | Skill | [analysis-pipeline](plugins/research-kit/skills/analysis-pipeline/SKILL.md) | Set up and run a repeatable analysis |
+| Skill | [tribunal](plugins/research-kit/skills/tribunal/SKILL.md) | Second opinion on a costly decision: sealed multi-lens review with a verbatim record |
 | Agent | [source-reader](plugins/research-kit/agents/source-reader.md) | Read one source into a note |
 | Agent | [claim-checker](plugins/research-kit/agents/claim-checker.md) | Judge whether notes support cited claims |
 | Agent | [skeptic](plugins/research-kit/agents/skeptic.md) | Challenge the strongest claims of a draft |
+| Agent | [tribune](plugins/research-kit/agents/tribune.md) | One seat of a tribunal: review through a single lens |
+| Agent | [refuter](plugins/research-kit/agents/refuter.md) | Try to disprove one finding |
 | Agent | [pipeline-runner](plugins/research-kit/agents/pipeline-runner.md) | Run a trusted analysis pipeline and report |
 | Tool | [verify-quotes](plugins/research-kit/bin/verify-quotes) | Match each quote, on its stated page, against a markdown copy of the source (hash enforced with `--strict`) |
 | Tool | [check-docx](plugins/research-kit/bin/check-docx) | Inventory and page-verify typed Word quotations without Zotero; see [Word workflow](docs/word.md) |
@@ -60,16 +66,20 @@ scope of that result.
 | Tool | [build-paper](plugins/research-kit/bin/build-paper) | Build PDF, HTML or DOCX with pandoc; [Word export](docs/word-export.md) is one-way output |
 | Tool | [new-project](plugins/research-kit/bin/new-project) | Scaffold a research project |
 | Tool | [new-pipeline](plugins/research-kit/bin/new-pipeline) | Scaffold an R or Python pipeline |
+| Tool | [tribunal-scribe](plugins/research-kit/bin/tribunal-scribe) | Hash-chained verbatim record for a tribunal workspace |
+| Tool | [doctor](plugins/research-kit/bin/doctor) | Read-only setup diagnostics with per-OS fixes; see [doctor](docs/doctor.md) |
 
-The [complete catalog](CATALOG.md) lists every component's inputs, outputs and
-dependencies; the [adapter guide](docs/adapters.md) covers manual use with other assistants.
+The [complete catalog](CATALOG.md) lists inputs, outputs and dependencies; the
+[adapter guide](docs/adapters.md) covers manual use with other assistants.
+
+</details>
 
 ## 30-second example
 
-The transcript above runs the offline quote check on the bundled example. The
-sources are bundled, so it needs neither PDF software nor an API key.
-
-To reproduce it, clone the [repository](https://github.com/nik110403/research-kit) and, with Python 3.9+, run from its root:
+The demo above is a real Claude Code run on a small demo project ([how it was made](tools/demo/README.md)).
+The offline quote check on the bundled example below needs no PDF software and no API key.
+To reproduce it, clone the repository and, with Python 3.9+,
+run from its root:
 
 ```sh
 cd examples/basic
@@ -77,17 +87,16 @@ python3 ../../plugins/research-kit/bin/verify-quotes --strict 01_notes/lit/*.md
 python3 ../../plugins/research-kit/bin/verify-quotes --strict 01_notes/negative/*.md
 ```
 
-The first command should print **14 of 14 PASS** and exit 0. The second should
-report the fabricated quotation as **FAIL** and exit 1; that failure is expected.
-See the [example walkthrough](examples/basic/RUN.md) and
-[source attribution](examples/basic/SOURCES.md). Every quote is matched, on a stated page, against a markdown copy of the source; `--strict` also requires that copy's recorded hash to match, which catches accidental edits but not tampering by someone with write access (see [what is verified](docs/verification.md)). That checks converted
-text, not the original PDF and not whether a claim follows from the quotation.
+The first prints **14 of 14 PASS**; the second reports the planted fabrication as
+**FAIL** (expected). See the [walkthrough](examples/basic/RUN.md). This checks converted
+text against quotes, not the original PDF and not whether a claim follows from a quote;
+see [what is verified](docs/verification.md) for the evidence limits.
 
 ## How it works
 
-Enter at any stage for which you have the inputs; the tools handle mechanical
-checks and the assistant roles return text for the main session to save. Details
-and evidence boundaries are in [docs/workflow.md](docs/workflow.md).
+Enter at any stage for which you have the inputs. The tools do the mechanical checks;
+the assistant roles return text for the main session to save. See
+[docs/workflow.md](docs/workflow.md).
 
 ```mermaid
 flowchart LR
@@ -104,23 +113,17 @@ flowchart LR
 
 ## Configuration
 
-- Python helpers require Python 3.9+ and use the standard library only. Search needs internet access. Semantic
-  Scholar can reject keyless requests; an optional `SEMANTIC_SCHOLAR_API_KEY`
-  helps, and receipts report provider failures and partial coverage.
-- PDF conversion needs Poppler's `pdftotext`; scans may need `ocrmypdf`, encrypted
-  files `qpdf`. `pdf2md` refuses `--engine docling` (removed in 0.1.3: its output is one
-  block marked page 1, which breaks page pinning). Recheck page pins against the PDF.
-- Paper builds need Python 3.9+ and pandoc; PDF prefers Typst then XeLaTeX, and
-  falls back explicitly to HTML if neither exists. Windows invocation is supported
-  through `python`/`py -3`; CI covers helpers, not a live Codex session.
-- R pipelines need R; Python pipelines can use `uv`. Running a pipeline executes
-  project code with your permissions. Model steps also depend on your assistant's
-  access and may incur its usual costs. No native non-Claude integration or
-  cross-platform performance guarantee is claimed.
+Python 3.9+ (standard library only) runs the helpers; PDF conversion needs `pdftotext`,
+paper builds need pandoc, and an optional `SEMANTIC_SCHOLAR_API_KEY` helps search. Dependencies,
+Windows invocation and limits: [INSTALL.md](INSTALL.md#platform-and-dependency-checklist).
 
 ## Contributing
 
 [CONTRIBUTING.md](CONTRIBUTING.md) covers checks, privacy and licensing.
+
+## Security
+
+Report vulnerabilities privately; see [SECURITY.md](SECURITY.md).
 
 ## License
 

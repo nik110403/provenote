@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Changed
+
+- README restructured around install, a demo and a 30-second example; the full tool table is folded
+  into a collapsible section. [INSTALL.md](INSTALL.md) gains an "Install the external tools" section.
+
 ### Fixed
 
 - `check-docx` and `build-paper` no longer crash on Windows consoles with a non-UTF-8 code page when
@@ -11,6 +16,19 @@
 
 ### Added
 
+- Animated README and landing-page demo built from one real Claude Code run on a small demo project
+  (`assets/demo-light.svg`, `assets/demo-dark.svg`); `tools/demo/` holds the captured transcript, the
+  stdlib-only renderer and the fixture, so it can be regenerated.
+- `scripts/install-deps.sh` (macOS Homebrew, Debian/Ubuntu apt, Fedora dnf) and `scripts/install-deps.ps1`
+  (Windows winget, Chocolatey fallback) install Poppler and pandoc, optionally Typst, then run `doctor`;
+  `--dry-run` / `-DryRun` previews. CI runs them in dry-run mode.
+- GitHub Pages landing page under `site/` and a `pages` workflow that assembles and deploys it.
+- `SECURITY.md` (how to report a vulnerability).
+- `.github/RELEASE_NOTES_TEMPLATE.md` for release notes.
+- `tribunal` skill, `tribune` and `refuter` agents, and the `tribunal-scribe` tool: a sealed, multi-lens
+  review of a costly decision with a verbatim, hash-chained record. Ported from the
+  [ai-architecture](https://github.com/nik110403/ai-architecture) collection; the record tool and its
+  tests run, the panel procedure is instructions for the assistant.
 - `build-paper --to docx --reference-doc PATH` applies a user-maintained pandoc style reference without
   changing it; [Word export](docs/word-export.md) documents this one-way output and its limits.
 - The portable smoke test now exports a styled DOCX and runs the no-Zotero Word binding demonstration in

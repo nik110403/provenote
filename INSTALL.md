@@ -9,7 +9,7 @@ In Claude Code, add the public marketplace and install its plugin:
 /plugin install research-kit@research-kit
 ```
 
-This loads the packaged seven skills and four roles from the canonical
+This loads the packaged eight skills and six roles from the canonical
 `plugins/research-kit/` tree. It does not install Python, Poppler, pandoc, R or
 optional dependencies. Do not replace your existing settings, `CLAUDE.md`,
 `AGENTS.md` or permission policy with this collection's examples.
@@ -28,6 +28,35 @@ bare tool names: either add this directory for the current shell with
 `export PATH="$KIT/bin:$PATH"` (and ensure executable permission), or explicitly
 give your assistant the absolute tool path. A Markdown skill is not a PATH setup
 mechanism; changing directories alone will not resolve a bare command.
+
+## Install the external tools (one command)
+
+The helpers need Poppler (`pdftotext`) and pandoc; Typst is optional for PDF output.
+Reading or loading a skill does not execute any tool; tools run only when the assistant
+calls them. Git is needed for the marketplace route above (the ZIP route in the
+[Codex adapter](#codex-adapter) section needs none).
+
+macOS (Homebrew), Debian/Ubuntu and Fedora:
+
+```sh
+bash scripts/install-deps.sh            # shows the commands, asks y/N
+bash scripts/install-deps.sh --yes      # no prompt
+bash scripts/install-deps.sh --typst    # also install Typst
+bash scripts/install-deps.sh --dry-run  # preview only
+```
+
+Windows (PowerShell 5.1+; winget, falls back to Chocolatey):
+
+```powershell
+.\scripts\install-deps.ps1 [-Yes] [-Typst] [-DryRun]
+```
+
+Add `--workflow pdf|build` (`-Workflow`) to install only what one workflow needs. Tools
+already on PATH are skipped. The script ends by running `doctor`, so a clean exit means
+setup is complete. Homebrew is not installed for you; get it at <https://brew.sh>. On
+other systems the script prints what to install by hand and exits 3. With `--typst`, only
+Homebrew and the Windows managers install Typst; on apt and dnf the script prints a hint
+instead, because `typst` is missing from many Debian/Ubuntu and Fedora repositories.
 
 ## Selective skills and roles
 
@@ -56,6 +85,7 @@ cp "$KIT/agents/source-reader.md" "$PROJECT/.claude/agents/"
 Alternatively, read a role as a manual contract and provide its task to an
 assistant; that does not create a native agent or enforce permissions. Review
 needs `claim-checker` and `skeptic` as well as `verify-quotes` and `check-claims`.
+A tribunal needs `tribune`, `refuter` and `tribunal-scribe` (and a git repository for the workspace).
 Analysis needs `pipeline-runner`; running project code is a separate trust decision.
 
 ## Selective tools and templates
@@ -114,12 +144,17 @@ not a replacement for instructions in an existing one.
 
 ## Platform and dependency checklist
 
-Python 3.9+ covers the eight helpers. `pdf2md` additionally needs `pdftotext`
+Python 3.9+ covers the eleven helpers. `pdf2md` additionally needs `pdftotext`
 from Poppler; optional `ocrmypdf` handles scans and `qpdf` encrypted PDFs. Docling was removed in 0.1.3: `pdf2md --engine docling` is refused
 because its output is one block marked page 1, which breaks page pinning. Search uses OpenAlex, Semantic Scholar and doi.org.
 Set an optional `SEMANTIC_SCHOLAR_API_KEY` in the process environment, never
 in tracked files; without a key Semantic Scholar often returns 429/403.
 Inspect receipts for partial provider coverage. `LIT_SEARCH_MAILTO` is optional.
+
+Model steps (the skills and roles) depend on your assistant's access and may incur
+its usual costs. CI covers the helpers on Linux, macOS and Windows, not a live Codex
+session; no native non-Claude integration and no cross-platform performance guarantee
+is claimed. Running a pipeline executes project code with your permissions.
 
 `build-paper` needs Python 3.9+ and pandoc on PATH. It prefers Typst then XeLaTeX
 for PDF, and explicitly writes HTML if neither engine exists; use `--to html` or
@@ -138,7 +173,49 @@ commands, template creation, and the one-way/static-citation limits.
 ### Codex adapter
 
 Install one self-contained Codex skill into an existing project; it does not alter
-`AGENTS.md`, global configuration, or the Claude plugin:
+`AGENTS.md`, global configuration, or the Claude plugin. The skill is discovered
+from `<project>/.agents/skills/research-kit/`, so use a project you intend Codex to
+work in.
+
+#### No Git or Python: copy with a file manager
+
+On GitHub, choose **Code → Download ZIP**, extract the archive, and open its
+`research-kit` folder in your file manager. In the project where you use Codex,
+create `.agents`, then `skills` inside it (enable hidden files first if `.agents`
+is not visible). Create the final `research-kit` folder once, so the result is:
+
+```text
+<project>/.agents/skills/research-kit/
+  SKILL.md
+  bin/
+  templates/
+  agents/
+  workflows/
+```
+
+Copy `docs/codex/SKILL.md` from the extracted repository into that final folder and
+name it `SKILL.md`. Copy `bin/`, `templates/`, and `agents/` from
+`plugins/research-kit/` alongside it. Finally copy the **whole**
+`plugins/research-kit/skills/` folder there and rename that copied folder
+`workflows/`. Do not copy a folder named `research-kit` into the final
+`research-kit` folder: that creates redundant nesting and prevents the expected
+layout.
+
+Before copying, stop if `<project>/.agents/skills/research-kit/` already exists.
+Back it up and compare it; do not overwrite a destination or instructions you did
+not inspect. Restart Codex after copying, then explicitly ask: `$research-kit show
+me the available research-kit workflows; do not run helpers yet.` This checks skill
+discovery only. It does **not** prove that research helpers work.
+
+Copying or loading these Markdown instructions needs no Python. Python 3.9+ is
+needed only when actual research helpers run. Do not run `doctor` until Python is
+available and its launcher is confirmed.
+
+#### Optional Python installer
+
+If Python 3.9+ is already available, this convenience installer builds the same
+layout and retains its safe behavior: it accepts an identical destination and
+refuses a differing one. Git is not required if you extracted a ZIP:
 
 ```sh
 python3 scripts/install-codex.py --project /absolute/path/to/project
@@ -151,6 +228,21 @@ python .\scripts\install-codex.py --project C:\path\to\project
 The installed skill is `.agents/skills/research-kit/`. Set `$researchKit` to that
 path when prompting Codex to run a clean quote demo. R and any analysis packages belong to the chosen
 pipeline environment; `uv` and `renv` are optional environment-management tools.
+
+#### Before running helpers
+
+Python is optional for installation, but required for every bundled research helper.
+If it is missing, use the official [Windows installer](https://www.python.org/downloads/windows/)
+or [macOS installer](https://www.python.org/downloads/macos/). On Debian or Ubuntu,
+run `sudo apt update && sudo apt install python3`; on Fedora, run `sudo dnf install
+python3`. Close and reopen the terminal, then check `python3 --version` on Linux or
+macOS, or `py -3 --version` / `python --version` in PowerShell. Confirm it reports
+Python 3.9 or newer before running doctor. If an older distribution supplies an
+older Python, use a supported distribution release or the [official Python
+downloads](https://www.python.org/downloads/) and check again. Only then run the
+installed `bin/doctor` for the workflow you plan to use. PDF conversion and paper
+builds have additional optional dependencies (such as Poppler, pandoc, Typst, or
+XeLaTeX); install them only for those workflows.
 
 Try the [offline quote check](README.md) before adding network or build
 dependencies. Other-assistant adaptation is described in [docs/adapters.md](docs/adapters.md).

@@ -1,0 +1,2 @@
+stem,source,sha256,pages,chars_per_page,method,md_path,md_sha256,converter
+lei2023financial,examples/basic/02_sources/pdf/lei2023financial.pdf,f1349e45bc1b58023cf6c1443a07829540f017ce0cfd76c81e1584cb1c0be81b,14,3570.1,pdftotext,examples/basic/02_sources/md/lei2023financial.md,f3122e973e0994cbca942d09caae7499a1955924c6cd2bb6cc3b0a74adefafd2,pdf2md 0.1.3

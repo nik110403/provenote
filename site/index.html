@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>research-kit: source-grounded research for Claude Code</title>
+<meta name="description" content="Turn a reading list into notes whose every quote is checked against its page, check a draft against those notes, and build the paper.">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#faf7f2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f0d0a" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%238c2f1b'/%3E%3C/svg%3E">
+<link rel="preload" href="fonts/Fraunces-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<a class="skip" href="#install">Skip to install</a>
+
+<header class="top">
+  <p class="brand"><span class="mark">research-kit</span> <span class="tag">early-stage Claude Code plugin</span></p>
+  <nav aria-label="Project links">
+    <a href="https://github.com/nik110403/research-kit">GitHub</a>
+    <a href="#install">Install</a>
+    <a href="https://github.com/nik110403/research-kit/blob/main/CATALOG.md">Catalog</a>
+    <a href="https://github.com/nik110403/research-kit/blob/main/CHANGELOG.md">Changelog</a>
+  </nav>
+</header>
+
+<main>
+<section class="hero">
+  <h1>Every quote in your notes, checked against its page.</h1>
+  <p class="lede">Turn a reading list into source-grounded notes, check a draft against them, and build the paper. The quote check is a program, not a model's opinion: each quote is matched on its stated page against a page-marked Markdown copy of the source. <a href="#verified">What that does and does not show.</a></p>
+  <p class="local">No server, no account, no API key for the quote check. The skills are Markdown that your assistant reads; the helpers are standard-library Python that runs on your machine. Converting PDFs needs Poppler's <code>pdftotext</code>, and building a paper needs <code>pandoc</code>.</p>
+</section>
+
+<section id="install" class="install" aria-labelledby="install-h">
+  <h2 id="install-h">Install</h2>
+  <p>In Claude Code, with Git installed:</p>
+  <div class="cmd">
+    <pre><code>/plugin marketplace add nik110403/research-kit</code></pre>
+    <button type="button" class="copy" aria-label="Copy the marketplace add command">Copy</button>
+  </div>
+  <div class="cmd">
+    <pre><code>/plugin install research-kit@research-kit</code></pre>
+    <button type="button" class="copy" aria-label="Copy the plugin install command">Copy</button>
+  </div>
+  <p class="status" id="copy-status" role="status" aria-live="polite"></p>
+  <p class="note">Then ask Claude to start a research project, search the literature, or verify notes. A Codex adapter exists too; see the <a href="https://github.com/nik110403/research-kit/blob/main/INSTALL.md">install guide</a>.</p>
+</section>
+
+<section class="demo" aria-labelledby="demo-h">
+  <h2 id="demo-h">Seen in a real run</h2>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="demo-dark.svg">
+    <img src="demo-light.svg" width="828" height="745" alt="Animated terminal demo of a real Claude Code run on a small example project: verify-quotes passes the six real quotes of one note and fails a planted fabricated quote, check-claims flags a draft sentence with an invented quote and an uncited quotation, and Claude lists which draft sentences the notes do not back.">
+  </picture>
+  <pre class="tx-narrow" role="img" aria-label="Animated terminal demo of a real Claude Code run on a small example project: verify-quotes passes the six real quotes of one note and fails a planted fabricated quote, check-claims flags a draft sentence with an invented quote and an uncited quotation, and Claude lists which draft sentences the notes do not back."><code>$ verify-quotes --strict 01_notes/lit/*.md; echo "EXIT=$?"; verify-quotes --strict 01_notes/negative/*.md; echo "EXIT=$?"; check-claims --root . 10_paper/draft.md; echo "EXIT=$?"
+PASS lei2023financial.md: quote 1 (p. 2)
+[… 4 PASS lines omitted]
+PASS lei2023financial.md: quote 6 (p. 11)
+FAIL lei2023financial.md: quote 1 (p. 1): text not found in source
+[… notes path line, table separator and 2 OK rows omitted]
+| line | key | status | paragraph | detail |
+| 5 | lei2023financial | UNVERIFIED (advisory) | The authors stress that "flexibility cushions every economy, including the eurozone, by roughly 4... | quote not verbatim in lei2023financial source (check ellipsis/brackets/case): "flexibility cushions every economy, including the eurozone, by roughly 4 percent of GDP" |
+| 9 | - | UNCITED (advisory) | As one commentator put it, "labour reform is the only free lunch left in macroeconomics". | quotation without a citation (cite its source, or mark the block &lt;!-- unsourced: reason --&gt;): "labour reform is the only free lunch left in macroeconomics" |
+advisory: draft-quote check is heuristic; run with --strict-quotes to make it fail
+3 cited paragraph(s); 0 row(s) not OK; 2 advisory.
+
+- Line 5 isn't backed: "flexibility cushions every economy, including the eurozone, by roughly 4 percent of GDP." The quote isn't word-for-word in the source. The note also says the reverse: there's no effect in the eurozone, and no "4 percent" figure appears anywhere.
+- Line 9 isn't backed: "labour reform is the only free lunch left in macroeconomics." It has no citation, and no note supports it.
+- Lines 3 and 7 are backed by the note's claims. Separately, the strict check failed on `01_notes/negative/lei2023financial.md`: its quote 1 (p. 1) isn't in the source. That's a problem in the note, not the draft. I didn't edit any files.</code></pre>
+  <p class="note">A real Claude Code run on a small demo project (about 18 seconds, plays once; <a href="https://github.com/nik110403/research-kit/blob/main/tools/demo/README.md">how it was made</a>). Six quotes pass, one planted fabrication fails, and the draft's invented quote and uncited quotation are flagged. The sources ship with the repository.</p>
+</section>
+
+<section class="outcomes" aria-labelledby="out-h">
+  <h2 id="out-h">What you get</h2>
+  <ol>
+    <li><div><h3>Notes whose every quote is checked</h3><p>A reading list becomes structured notes with page-pinned quotes. Each quote is matched on its stated page against a Markdown copy of the source.</p></div></li>
+    <li><div><h3>A draft checked against those notes</h3><p>Review roles read the draft against the notes, challenge its strongest claims, and flag citations the notes do not support.</p></div></li>
+    <li><div><h3>A paper that builds</h3><p>The bibliography is checked for structure and coverage, then pandoc builds PDF, HTML or DOCX.</p></div></li>
+  </ol>
+</section>
+
+<section class="flow" aria-labelledby="flow-h">
+  <h2 id="flow-h">How it works</h2>
+  <p>Enter at any stage for which you have the inputs. The tools do the mechanical checks; the assistant roles return text for your session to save.</p>
+  <ol class="steps">
+    <li><b>Scaffold</b><span>numbered project tree</span></li>
+    <li><b>Search</b><span>providers, with a receipt</span></li>
+    <li><b>Convert</b><span>PDF to page-marked Markdown</span></li>
+    <li class="key"><b>Verify quotes</b><span>each quote, on its page</span></li>
+    <li><b>Draft</b><span>written by you</span></li>
+    <li><b>Review</b><span>against the notes</span></li>
+    <li><b>Build</b><span>bibliography check, then paper</span></li>
+  </ol>
+  <p class="side">Side track: set up and run a repeatable analysis, then return to the draft.</p>
+</section>
+
+<section id="verified" class="verified" aria-labelledby="ver-h">
+  <h2 id="ver-h">What is and is not verified</h2>
+  <p>The check is narrow: each quote appears, on its stated page, in a hashed Markdown copy of the source (hash enforced with <code>--strict</code>). It does not show that the copy matches the original PDF, that the quote supports the claim, or that the claim is true. Those stay with a model or with you. <a href="https://github.com/nik110403/research-kit/blob/main/docs/verification.md">Read the full boundary</a>.</p>
+</section>
+</main>
+
+<footer>
+  <nav aria-label="More">
+    <a href="https://github.com/nik110403/research-kit">GitHub</a>
+    <a href="https://github.com/nik110403/research-kit/blob/main/INSTALL.md">Install guide</a>
+    <a href="https://github.com/nik110403/research-kit/blob/main/CATALOG.md">Catalog</a>
+    <a href="https://github.com/nik110403/research-kit/blob/main/CHANGELOG.md">Changelog</a>
+  </nav>
+  <p>Code, skills and agents: <a href="https://github.com/nik110403/research-kit/blob/main/LICENSE">MIT</a>. Documentation: <a href="https://github.com/nik110403/research-kit/blob/main/LICENSE-docs">CC BY 4.0</a>. Typefaces Fraunces, Space Grotesk and Atkinson Hyperlegible: <a href="fonts/OFL.txt">SIL Open Font License 1.1</a>. Full <a href="https://github.com/nik110403/research-kit/blob/main/LICENSING.md">licensing map</a>.</p>
+</footer>
+
+<script>
+document.querySelectorAll('.copy').forEach(function (b) {
+  b.addEventListener('click', function () {
+    var t = b.previousElementSibling.textContent.trim();
+    var name = b.getAttribute('aria-label').replace(/^Copy /, '');
+    var status = document.getElementById('copy-status');
+    clearTimeout(window.copyTimer);
+    var done = function () {
+      b.textContent = 'Copied'; status.textContent = 'Copied ' + name + '.';
+      window.copyTimer = setTimeout(function () { b.textContent = 'Copy'; status.textContent = ''; }, 1600);
+    };
+    var fail = function () { status.textContent = 'Copy failed. Select the command and press Ctrl+C.'; };
+    if (navigator.clipboard) { navigator.clipboard.writeText(t).then(done, fail); } else { fail(); }
+  });
+});
+</script>
+</body>
+</html>

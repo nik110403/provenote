@@ -21,9 +21,11 @@ are instructions, not imported permissions. If independent roles are unavailable
 run their steps serially and label the result non-independent.
 
 During setup and on any operational failure, read and follow
-`templates/agent-recovery.md` relative to this installed skill directory. It
-allows at most two environment-only repair attempts using existing permissions,
-then requires an exact-error report. Research mismatches are not repair targets.
+`templates/agent-recovery.md` relative to this installed skill directory. If Python
+is absent, report that prerequisite and use the installation guide before trying
+`doctor`; it requires Python. The recovery guidance allows at most two
+environment-only repair attempts using existing permissions, then requires an
+exact-error report. Research mismatches are not repair targets.
 
 Useful local checks:
 
@@ -47,8 +49,9 @@ of a complete draft. Canonical workflow command examples use the installed helpe
 paths above; consult the copied `workflows/` folders for their full assets.
 
 For static DOCX output, `build-paper --to docx --reference-doc <path>` uses a
-pandoc style reference document. Read [the Word export walkthrough](../word-export.md)
-for template creation and its one-way/static-citation limits.
+pandoc style reference document. For template creation and its
+one-way/static-citation limits, read `docs/word-export.md` in the downloaded
+research-kit repository; that walkthrough is not bundled in this installed skill.
 
 For an ordinary Word lecture, use `$research-kit` to request the Word workflow.
 Run `check-docx --inventory`, then have the user explicitly confirm every

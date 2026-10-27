@@ -4,15 +4,12 @@ Use this when a lecture already exists as a `.docx` with ordinary typed
 author--year citations. `check-docx` reads that saved file and never edits it.
 It uses neither Zotero nor prewritten research-kit notes.
 
-## Get the preview checkout
+## Install
 
-Until 0.1.3 is released, copy the public clone URL from the repository's Code
-menu and clone the preview branch:
+Install the released version (0.1.3) as described in the
+[README](../README.md#claude-code) or [INSTALL.md](../INSTALL.md).
 
-```sh
-git clone --branch lecture-ready-test <public-clone-url>
-cd research-kit
-```
+To reproduce the demonstration below, clone the repository (see the [README](../README.md#30-second-example)) and, with Python 3.9+, run from its root.
 
 On Unix-like systems, use `python3`; on native Windows PowerShell, use the
 Python launcher as `py -3` (or `python` if that is your Python 3 command).

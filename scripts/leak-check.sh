@@ -59,7 +59,8 @@ scan() {
       deny = ENVIRON["LEAK_CHECK_DENYLIST"]
       home = "/ho" "me/"; users = "/Us" "ers/"
       public_owner = "nik" "110403"
-      public_url = "https://github\\.com/" public_owner "/(research-kit|ai-architecture)"
+      public_url = "https://github\\.com/" public_owner "/(research-kit|ai-architecture)(/actions/workflows/ci\\.yml(/badge\\.svg)?)?"
+      site_url = "https://github\\.com/" public_owner "/research-kit"
       n = 0
       if (deny != "") while ((getline t < deny) > 0) {
         sub(/\r$/, "", t); sub(/^[ \t]+/, "", t); sub(/[ \t]+$/, "", t)
@@ -68,6 +69,18 @@ scan() {
       }
     }
     function hit(kind, s) { printf "%s: [%s] %s\n", $1, kind, s; bad = 1 }
+    function site_references(s, out, p, len, before, after, token) {
+      out = ""; s = tolower(s)
+      while (match(s, site_url)) {
+        p = RSTART; len = RLENGTH; token = substr(s, p, len)
+        before = p > 1 ? substr(s, p - 1, 1) : ""
+        after = substr(s, p + len, 1)
+        if (before == "\"" && (after == "\"" || after == "/")) token = " "
+        out = out substr(s, 1, p - 1) token
+        s = substr(s, p + len)
+      }
+      return out s
+    }
     function public_references(s, out, p, len, before, after, token) {
       out = ""
       while (match(s, public_url)) {
@@ -111,11 +124,14 @@ scan() {
       # The vendored banner tool carries the site name as its --footer default; allowed on that exact line only.
       if ($1 ~ /(^|:)tools\/banner\/bin\/make-banner:[0-9]+$/ && line ~ /^    p\.add_argument\("--footer", default="[a-z.]+"\)$/) next
       if ($1 ~ /(^|:)README\.md:[0-9]+$/ && line ~ /^\/plugin marketplace add [A-Za-z0-9-]+\/research-kit$/) next
+      # landing page: only the exact public base URL inside href="..." is blanked; the URL path stays compared against the denylist
+      if ($1 ~ /^([0-9a-f]+:)?site\/index\.html:[0-9]+$/) low = site_references(line)
+      if ($1 ~ /^([0-9a-f]+:)?site\/index\.html:[0-9]+$/ && line == "    <pre><code>/plugin marketplace add " public_owner "/research-kit</code></pre>") next
       # Only exact public tokens in these root-relative docs leave the comparison.
       # All other text, including other deny terms on the same line, stays checked.
-      if ($1 ~ /^([0-9a-f]+:)?(README\.md|INSTALL\.md|CATALOG\.md|CONTRIBUTING\.md|CHANGELOG\.md|docs\/(adapters|workflow)\.md):[0-9]+$/) {
+      if ($1 ~ /^([0-9a-f]+:)?(README\.md|INSTALL\.md|CATALOG\.md|CONTRIBUTING\.md|CHANGELOG\.md|docs\/(adapters|workflow|getting-started)\.md):[0-9]+$/) {
         comparison = public_references(line)
-        if ($1 ~ /^([0-9a-f]+:)?INSTALL\.md:[0-9]+$/ &&
+        if ($1 ~ /^([0-9a-f]+:)?(INSTALL|docs\/getting-started)\.md:[0-9]+$/ &&
             line == "/plugin marketplace add " public_owner "/research-kit") comparison = ""
         low = tolower(comparison)
       }

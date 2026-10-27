@@ -329,6 +329,45 @@ class LeakCheck(unittest.TestCase):
                     self.check_reference("README.md", url + suffix, 1, kind="denylist")
             self.check_reference("README.md", "x" + url, 1, kind="denylist")
 
+    def site_page_case(self, content, expected):
+        self.check_reference(
+            "site/index.html", content, expected, kind="denylist" if expected else None
+        )
+
+    def test_site_page_allowances_are_anchored(self):
+        owner = PUBLIC_HANDLE
+        base = "https://github.com/" + owner + "/research-kit"
+        install = "    <pre><code>/plugin marketplace add " + owner + "/research-kit</code></pre>"
+        # accepted forms
+        self.site_page_case('<a href="' + base + '">x</a>', 0)
+        self.site_page_case('<a href="' + base + '/blob/main/docs/verification.md">x</a>', 0)
+        self.site_page_case(install, 0)
+        # trailing content after the install line, wrong owner, path tricks
+        self.site_page_case(install + '<a href="https://github.com/' + owner + '/privatefixtureword">x</a>', 1)
+        self.site_page_case(install + " privatefixtureword", 1)
+        self.site_page_case(
+            "    <pre><code>/plugin marketplace add privatefixtureword/research-kit</code></pre>", 1
+        )
+        for tail in (
+            "/blob/main/../../privatefixtureword",
+            "/blob/main/privatefixtureword/notes.md",
+            "/blob/main/PRIVATEFIXTUREWORD/notes.md",
+            "/tree/main//privatefixtureword",
+            "-privatefixtureword",
+            "/privatefixtureword",
+        ):
+            with self.subTest(tail=tail):
+                self.site_page_case('<a href="' + base + tail + '">x</a>', 1)
+        self.site_page_case(
+            '<A HREF="' + base.upper().replace("HTTPS", "https") + "/BLOB/MAIN/PRIVATEFIXTUREWORD" + '">x</A>', 1
+        )
+        self.site_page_case('<a href="' + base + '">x</a> privatefixtureword', 1)
+        self.site_page_case('<a href="x' + base + '">x</a>', 1)
+        # the allowances apply to the exact file label only
+        for name in ("docs/site/index.html", "a/site/index.html", "site/index.html.bak"):
+            with self.subTest(name=name):
+                self.check_reference(name, '<a href="' + base + '">x</a>', 1, kind="denylist")
+
     def test_public_urls_unexpected_files_are_denied(self):
         for name in ("other.md", "nested/README.md", "docs/other.md"):
             for url in PUBLIC_URLS:

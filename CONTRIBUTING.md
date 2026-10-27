@@ -52,3 +52,4 @@ Update [CATALOG.md](CATALOG.md) and [INSTALL.md](INSTALL.md) when dependencies o
 layout change. Keep all components under `plugins/research-kit/`; avoid duplicate
 trees, root aliases and undocumented support files. Add unreleased changes to
 [CHANGELOG.md](CHANGELOG.md) without inventing a release or platform claim.
+Release notes start from [.github/RELEASE_NOTES_TEMPLATE.md](.github/RELEASE_NOTES_TEMPLATE.md).
