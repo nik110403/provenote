@@ -138,7 +138,7 @@ class InstallDepsSh(unittest.TestCase):
         self.assertEqual(self.run_script("Linux", "ID=fedora\n", "--workflow", "word").returncode, 2)
 
 
-@unittest.skipUnless(shutil.which("pwsh"), "pwsh not available")
+@unittest.skipUnless(os.name == "nt" and shutil.which("pwsh"), "Windows with pwsh only: winget/choco do not exist elsewhere")
 class InstallDepsPs1(unittest.TestCase):
     def test_dry_run(self):
         r = subprocess.run(["pwsh", "-NoProfile", "-File", str(PS1), "-DryRun", "-Typst"],
