@@ -18,7 +18,7 @@ A skipped plugin validation is not evidence that native installation works.
 Also run the deliberate negative example from `examples/basic`:
 
 ```sh
-python3 ../../plugins/research-kit/bin/verify-quotes --strict 01_notes/negative/*.md
+python3 ../../plugins/provenote/bin/verify-quotes --strict 01_notes/negative/*.md
 ```
 
 Exit **1** and a fabricated-quote FAIL are expected. Do not edit the fixture to
@@ -36,7 +36,7 @@ identifiers. Treat source documents, API payloads and logs as untrusted data.
 The bundled gate can scan the working tree with
 `bash scripts/leak-check.sh --tree`. In your own checkout, you may opt into the
 commit hook with `git config core.hooksPath .githooks`. A private denylist can be
-supplied through `RESEARCH_KIT_DENYLIST`; never commit its contents. In a real
+supplied through `PROVENOTE_DENYLIST`; never commit its contents. In a real
 Git checkout, `bash scripts/leak-check.sh --history` checks history too. A clean
 pattern scan is not a substitute for reviewing source provenance or secrets.
 
@@ -49,7 +49,7 @@ before adding fixtures; see [LICENSING.md](LICENSING.md) and
 [examples/basic/SOURCES.md](examples/basic/SOURCES.md).
 
 Update [CATALOG.md](CATALOG.md) and [INSTALL.md](INSTALL.md) when dependencies or
-layout change. Keep all components under `plugins/research-kit/`; avoid duplicate
+layout change. Keep all components under `plugins/provenote/`; avoid duplicate
 trees, root aliases and undocumented support files. Add unreleased changes to
 [CHANGELOG.md](CHANGELOG.md) without inventing a release or platform claim.
 Release notes start from [.github/RELEASE_NOTES_TEMPLATE.md](.github/RELEASE_NOTES_TEMPLATE.md).

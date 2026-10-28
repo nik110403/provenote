@@ -10,7 +10,7 @@ LINT = Path(__file__).resolve().parent.parent / "scripts/lint-skills.py"
 class LintSkills(unittest.TestCase):
     def lint(self, front):
         with tempfile.TemporaryDirectory() as t:
-            d = Path(t) / "plugins/research-kit/skills/demo"
+            d = Path(t) / "plugins/provenote/skills/demo"
             d.mkdir(parents=True)
             (d / "SKILL.md").write_bytes(f"---\n{front}\n---\nbody\n".encode("utf-8"))
             return subprocess.run([sys.executable, str(LINT), t], capture_output=True, text=True)

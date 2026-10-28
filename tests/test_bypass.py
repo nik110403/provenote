@@ -14,7 +14,7 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-BIN = ROOT / "plugins/research-kit/bin"
+BIN = ROOT / "plugins/provenote/bin"
 FIX = Path(__file__).resolve().parent / "fixtures/bypass"
 _ld = importlib.machinery.SourceFileLoader("vq", str(BIN / "verify-quotes"))
 vq = importlib.util.module_from_spec(importlib.util.spec_from_loader("vq", _ld))

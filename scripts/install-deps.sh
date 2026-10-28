@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# install-deps.sh - install the external tools the research-kit helpers need.
+# install-deps.sh - install the external tools the provenote helpers need.
 # Usage: install-deps.sh [--workflow pdf|build|all] [--typst] [--dry-run] [--yes]
 # macOS: brew. Debian/Ubuntu: apt-get. Fedora: dnf. Others: manual hints, exit 3.
 # Exit: doctor's code at the end; 2 bad usage; 3 unsupported OS; 4 Homebrew missing;
-# 1 declined/failed install. Package names mirror plugins/research-kit/bin/doctor.
+# 1 declined/failed install. Package names mirror plugins/provenote/bin/doctor.
 # Note: older apt releases may ship pandoc < 2.11; doctor reports that after install.
 # --typst installs via brew only; on apt/dnf a manual hint is printed instead.
 set -u
@@ -45,9 +45,9 @@ esac
 src=${BASH_SOURCE[0]}
 case "$src" in */*) src_dir=${src%/*} ;; *) src_dir=. ;; esac
 script_dir=$(CDPATH='' cd -- "$src_dir" && pwd) || exit 1
-doctor="$script_dir/../plugins/research-kit/bin/doctor"
+doctor="$script_dir/../plugins/provenote/bin/doctor"
 if [ ! -f "$doctor" ]; then
-	echo "install-deps: doctor not found at $doctor (run from a full research-kit checkout)" >&2
+	echo "install-deps: doctor not found at $doctor (run from a full provenote checkout)" >&2
 	exit 1
 fi
 
@@ -93,7 +93,7 @@ if [ -z "$manager" ]; then
 	{
 		echo "install-deps: unsupported system (${kernel:-unknown}). Install manually:"
 		echo "  poppler (provides pdftotext), pandoc >= 2.11, optionally Typst >= 3.1"
-		echo "Then check with: python3 plugins/research-kit/bin/doctor --workflow $workflow"
+		echo "Then check with: python3 plugins/provenote/bin/doctor --workflow $workflow"
 	} >&2
 	exit 3
 fi

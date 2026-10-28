@@ -1,11 +1,11 @@
 {
-  "name": "research-kit",
+  "name": "provenote",
   "owner": { "name": "Nik Khosravipour", "url": "https://github.com/nik110403" },
   "metadata": { "description": "Skills, agents and tools for source-grounded research projects." },
   "plugins": [
     {
-      "name": "research-kit",
-      "source": "./plugins/research-kit",
+      "name": "provenote",
+      "source": "./plugins/provenote",
       "description": "Skills, agents and tools for source-grounded research projects."
     }
   ]

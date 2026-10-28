@@ -23,13 +23,13 @@ bundled: pandoc's default citation style is used; drop a `.csl` into `10_paper/`
    check-bib
    ```
 
-   If not on PATH, run it from the kit's plugins/research-kit/bin/. It reports duplicate keys,
+   If not on PATH, run it from the kit's plugins/provenote/bin/. It reports duplicate keys,
    entries missing author/title/year, malformed DOIs, keys cited but absent (error) and keys
    present but uncited (note). Exit 1 on any error.
 2. Build:
 
    ```
-    python3 "/absolute/path/to/plugins/research-kit/bin/build-paper" --to pdf
+    python3 "/absolute/path/to/plugins/provenote/bin/build-paper" --to pdf
    ```
 
     Use an absolute, quoted path (PowerShell: `python` or `py -3`). It logs tool versions,

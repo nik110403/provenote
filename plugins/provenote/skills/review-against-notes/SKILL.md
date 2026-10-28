@@ -15,7 +15,7 @@ Order matters: mechanical checks first, model judgment second, adversary last. R
    verify-quotes --strict 01_notes/lit/*.md
    ```
 
-   If not on PATH, run it from the kit's plugins/research-kit/bin/. Fix FAILs before going on.
+   If not on PATH, run it from the kit's plugins/provenote/bin/. Fix FAILs before going on.
 2. Map citations to notes:
 
    ```
@@ -28,7 +28,7 @@ Order matters: mechanical checks first, model judgment second, adversary last. R
    more than one, or an unreadable folder, stops the run with exit 2. It prints `notes: <folder>` on stderr:
    check that this is your project's notes folder.
 
-   If not on PATH, run it from the kit's plugins/research-kit/bin/. It prints a markdown table:
+   If not on PATH, run it from the kit's plugins/provenote/bin/. It prints a markdown table:
    OK, NO-SOURCE, UNSOURCED, UNCITED, or UNVERIFIED with the reason (no note, a note without quotes, a quote that fails
    `verify-quotes`, or a quoted passage of 4+ words in the paragraph that no cited source holds verbatim;
    check ellipses, `[brackets]`, case, and that every quotation mark is closed). A quote is checked

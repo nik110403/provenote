@@ -28,7 +28,7 @@ An occupied target is not an environment fault; never clear it as a repair.
    new-project <target-dir>
    ```
 
-   If `new-project` is not on PATH, run it from the kit's plugins/research-kit/bin/.
+   If `new-project` is not on PATH, run it from the kit's plugins/provenote/bin/.
 
 3. If it exits non-zero because the target is not empty, report that and ask for another
    path. Do not delete or overwrite anything.

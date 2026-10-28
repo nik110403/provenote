@@ -7,7 +7,7 @@ Requires: Python 3.9+, git, the `tribune` and `refuter` agents, and `tribunal-sc
 
 # Tribunal - sealed review, then discussion
 
-Use when an artifact (a paper's central claim before submission, an analysis plan, a research design choice, a decision) deserves more than one reviewer, because being wrong is costly or hard to undo. Do not use it for routine edits or anything a single check settles. The seat definition is `plugins/research-kit/agents/tribune.md`; false-positive filtering uses `plugins/research-kit/agents/refuter.md`; the verbatim record is written by `tribunal-scribe`. If not on PATH, run it from the kit's plugins/research-kit/bin/.
+Use when an artifact (a paper's central claim before submission, an analysis plan, a research design choice, a decision) deserves more than one reviewer, because being wrong is costly or hard to undo. Do not use it for routine edits or anything a single check settles. The seat definition is `plugins/provenote/agents/tribune.md`; false-positive filtering uses `plugins/provenote/agents/refuter.md`; the verbatim record is written by `tribunal-scribe`. If not on PATH, run it from the kit's plugins/provenote/bin/.
 
 What runs and what does not: the record tool and its tests run. The panel procedure below is instructions for the assistant, not automation; where your harness lacks a capability (a second model family, continuing a subagent), the step says what to do instead.
 
@@ -50,7 +50,7 @@ report.md             the main session's synthesis
 
 ## Phase 2 - discussion (parallel rounds over transcript.md)
 
-Each round, every judge - in parallel - reads transcript.md (all of it, or from its last turn on) and returns one **discussion turn** (format: the Discussion turn section of `plugins/research-kit/agents/tribune.md`). Collect all turns of the round in scratch first, then `tribunal-scribe append <ws> <k> <n> <lens> <file>` in seat order - no seat's round-k turn enters the record before every round-k turn is in.
+Each round, every judge - in parallel - reads transcript.md (all of it, or from its last turn on) and returns one **discussion turn** (format: the Discussion turn section of `plugins/provenote/agents/tribune.md`). Collect all turns of the round in scratch first, then `tribunal-scribe append <ws> <k> <n> <lens> <file>` in seat order - no seat's round-k turn enters the record before every round-k turn is in.
 
 - To continue a seat with its context kept, send it a follow-up message ("Round k: read the transcript from the previous round, return your discussion turn") if your harness supports continuing a subagent; otherwise start a fresh call per round whose prompt names the seat's opening file, the transcript and the turn format.
 - Record the seat's **hand-back payload**, not any prose it emits around it.

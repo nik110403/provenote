@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-TOOL = Path(__file__).resolve().parent.parent / "plugins/research-kit/bin/check-bib"
+TOOL = Path(__file__).resolve().parent.parent / "plugins/provenote/bin/check-bib"
 
 GOOD = """@article{a2020x,
   author = {Doe, Jane}, title = {A {Title}}, year = {2020},

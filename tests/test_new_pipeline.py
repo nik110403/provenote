@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-TOOL = Path(__file__).resolve().parent.parent / "plugins/research-kit/bin/new-pipeline"
+TOOL = Path(__file__).resolve().parent.parent / "plugins/provenote/bin/new-pipeline"
 
 
 def run(*args):

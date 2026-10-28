@@ -54,7 +54,7 @@ def main():
         verified = run(
             [
                 *launcher,
-                str(ROOT / "plugins/research-kit/bin/verify-quotes"),
+                str(ROOT / "plugins/provenote/bin/verify-quotes"),
                 "--strict",
                 "01_notes/lit/lei2023financial.md",
             ],
@@ -65,7 +65,7 @@ def main():
         run(
             [
                 *launcher,
-                str(ROOT / "plugins/research-kit/bin/build-paper"),
+                str(ROOT / "plugins/provenote/bin/build-paper"),
                 "--to",
                 "html",
             ],
@@ -87,7 +87,7 @@ def main():
         run(
             [
                 *launcher,
-                str(ROOT / "plugins/research-kit/bin/build-paper"),
+                str(ROOT / "plugins/provenote/bin/build-paper"),
                 "--to",
                 "docx",
                 "--reference-doc",

@@ -8,7 +8,7 @@ issue for a suspected vulnerability.
 
 ## In scope
 
-- The helpers in `plugins/research-kit/bin/` that read local files and run `pandoc`
+- The helpers in `plugins/provenote/bin/` that read local files and run `pandoc`
   or `pdftotext` (for example path handling, argument handling, unsafe file writes).
 - The pipeline runner, which executes project code with your permissions. Reports
   about it being run on untrusted projects are welcome, but running a pipeline on

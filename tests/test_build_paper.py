@@ -9,8 +9,8 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-TOOL = ROOT / "plugins/research-kit/bin/build-paper"
-TEMPLATE = ROOT / "plugins/research-kit/templates/project"
+TOOL = ROOT / "plugins/provenote/bin/build-paper"
+TEMPLATE = ROOT / "plugins/provenote/templates/project"
 
 BIB = "@article{a2020x, author={Doe, Jane}, title={Title}, journal={J}, year={2020}}\n"
 

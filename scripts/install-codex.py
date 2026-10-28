@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Install the self-contained research-kit Codex skill into one project."""
+"""Install the self-contained provenote Codex skill into one project."""
 
 import argparse
 import filecmp
@@ -49,7 +49,7 @@ def main():
     parser.add_argument(
         "--project",
         required=True,
-        help="project directory receiving .agents/skills/research-kit",
+        help="project directory receiving .agents/skills/provenote",
     )
     args = parser.parse_args()
     supplied_project = resolve_macos_var_alias(Path(args.project).absolute())
@@ -60,7 +60,7 @@ def main():
     project = supplied_project.resolve()
     if not project.is_dir():
         parser.error(f"project is not a directory: {project}")
-    destination = project / ".agents" / "skills" / "research-kit"
+    destination = project / ".agents" / "skills" / "provenote"
     for path in (project, project / ".agents", project / ".agents/skills", destination):
         try:
             reject_symlink_parents(path)
@@ -73,9 +73,9 @@ def main():
             )
             return 2
     root = Path(__file__).resolve().parent.parent
-    kit = root / "plugins/research-kit"
+    kit = root / "plugins/provenote"
     with tempfile.TemporaryDirectory(dir=project) as temp:
-        staged = Path(temp) / "research-kit"
+        staged = Path(temp) / "provenote"
         staged.mkdir()
         shutil.copy2(root / "docs/codex/SKILL.md", staged / "SKILL.md")
         for name in ("bin", "templates", "agents"):

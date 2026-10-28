@@ -6,7 +6,7 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[1]
-CHECK = REPO / "plugins/research-kit/bin/check-docx"
+CHECK = REPO / "plugins/provenote/bin/check-docx"
 
 
 def run(args, want):

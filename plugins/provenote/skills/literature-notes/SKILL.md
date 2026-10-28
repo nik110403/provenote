@@ -19,7 +19,7 @@ Source markdown carries page markers of the form `<!-- page N -->`; quote pages 
    verify-quotes --strict 01_notes/lit/*.md
    ```
 
-   If not on PATH, run it from the kit's plugins/research-kit/bin/. It prints PASS/FAIL per quote and exits non-zero on any FAIL. A quote passes only if it has at
+   If not on PATH, run it from the kit's plugins/provenote/bin/. It prints PASS/FAIL per quote and exits non-zero on any FAIL. A quote passes only if it has at
    least 5 words and appears in the source on the pinned page on word boundaries (whitespace and
    line-break hyphenation are ignored). A note with claims but no quotes fails; so does a front-matter
    line the parser cannot read, a `citekey` that differs from the file name, a `source_md` whose file

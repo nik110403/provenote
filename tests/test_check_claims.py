@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-TOOL = Path(__file__).resolve().parent.parent / "plugins/research-kit/bin/check-claims"
+TOOL = Path(__file__).resolve().parent.parent / "plugins/provenote/bin/check-claims"
 
 SOURCE = """---
 source: {k}.pdf

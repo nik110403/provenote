@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-TOOL = Path(__file__).resolve().parent.parent / "plugins/research-kit/bin/pdf2md"
+TOOL = Path(__file__).resolve().parent.parent / "plugins/provenote/bin/pdf2md"
 _loader = importlib.machinery.SourceFileLoader("pdf2md", str(TOOL))
 _spec = importlib.util.spec_from_loader("pdf2md", _loader)
 pdf2md = importlib.util.module_from_spec(_spec)

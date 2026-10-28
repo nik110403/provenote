@@ -1,6 +1,6 @@
-# What research-kit verifies, and what it leaves to judgment
+# What Provenote verifies, and what it leaves to judgment
 
-research-kit separates two kinds of checking. The command-line tools check text mechanically,
+Provenote separates two kinds of checking. The command-line tools check text mechanically,
 with no model and no network. Everything about meaning is judgment, by a model or by you.
 
 The mechanical claim is narrow: **every quote is matched, on a stated page, against a hashed

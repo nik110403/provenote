@@ -1,6 +1,8 @@
-<p><picture><source media="(prefers-color-scheme: dark)" srcset="assets/banner-dark.svg"><img src="assets/banner-light.svg" alt="research-kit" width="100%"></picture></p>
+<p><picture><source media="(prefers-color-scheme: dark)" srcset="assets/banner-dark.svg"><img src="assets/banner-light.svg" alt="Provenote" width="100%"></picture></p>
 
-[![CI](https://github.com/nik110403/research-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/nik110403/research-kit/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-8c2f1b?style=flat)](LICENSE) [![Plugin version](https://img.shields.io/badge/plugin-0.1.3-57534e?style=flat)](CHANGELOG.md)
+# Provenote
+
+[![CI](https://github.com/nik110403/provenote/actions/workflows/ci.yml/badge.svg)](https://github.com/nik110403/provenote/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-8c2f1b?style=flat)](LICENSE) [![Plugin version](https://img.shields.io/badge/plugin-0.2.0-57534e?style=flat)](CHANGELOG.md)
 
 **Turn a reading list into source-grounded notes, check a draft against them, and build a paper.**
 
@@ -9,7 +11,9 @@
 - A paper built as PDF, HTML or DOCX, after a bibliography check.
 
 No API key, no server: it runs inside the assistant you already use (Claude Code, or
-Codex through an adapter). Early-stage, version 0.1.3.
+Codex through an adapter). Early-stage, version 0.2.0.
+
+<sub>Formerly research-kit. Upgrading? Remove the old plugin first; see [INSTALL.md](INSTALL.md#upgrading-from-research-kit).</sub>
 
 [Catalog](CATALOG.md) · [Install guide](INSTALL.md) · [Workflow](docs/workflow.md) · [Lecture quickstart](docs/lecture.md) · [What is verified](docs/verification.md) · [Changelog](CHANGELOG.md)
 
@@ -19,8 +23,8 @@ In Claude Code (Git must be installed to download the plugin this way; the
 [ZIP route](INSTALL.md#codex-adapter) needs none):
 
 ```text
-/plugin marketplace add nik110403/research-kit
-/plugin install research-kit@research-kit
+/plugin marketplace add nik110403/provenote
+/plugin install provenote@provenote
 ```
 
 Reading or loading a skill does not execute any tool by itself; tools run only when the
@@ -43,31 +47,31 @@ file-manager route that needs no Git, Python or terminal ·
 
 | Kind | Name | What it does |
 |---|---|---|
-| Skill | [new-research-project](plugins/research-kit/skills/new-research-project/SKILL.md) | Scaffold a numbered project tree from a question |
-| Skill | [literature-search](plugins/research-kit/skills/literature-search/SKILL.md) | Search providers, save a reading list with a receipt |
-| Skill | [pdf-to-markdown](plugins/research-kit/skills/pdf-to-markdown/SKILL.md) | Convert PDFs to page-marked Markdown |
-| Skill | [literature-notes](plugins/research-kit/skills/literature-notes/SKILL.md) | Write a structured note with page-pinned quotes |
-| Skill | [review-against-notes](plugins/research-kit/skills/review-against-notes/SKILL.md) | Review a draft against the notes |
-| Skill | [paper-build](plugins/research-kit/skills/paper-build/SKILL.md) | Check the bibliography and build PDF or HTML |
-| Skill | [analysis-pipeline](plugins/research-kit/skills/analysis-pipeline/SKILL.md) | Set up and run a repeatable analysis |
-| Skill | [tribunal](plugins/research-kit/skills/tribunal/SKILL.md) | Second opinion on a costly decision: sealed multi-lens review with a verbatim record |
-| Agent | [source-reader](plugins/research-kit/agents/source-reader.md) | Read one source into a note |
-| Agent | [claim-checker](plugins/research-kit/agents/claim-checker.md) | Judge whether notes support cited claims |
-| Agent | [skeptic](plugins/research-kit/agents/skeptic.md) | Challenge the strongest claims of a draft |
-| Agent | [tribune](plugins/research-kit/agents/tribune.md) | One seat of a tribunal: review through a single lens |
-| Agent | [refuter](plugins/research-kit/agents/refuter.md) | Try to disprove one finding |
-| Agent | [pipeline-runner](plugins/research-kit/agents/pipeline-runner.md) | Run a trusted analysis pipeline and report |
-| Tool | [verify-quotes](plugins/research-kit/bin/verify-quotes) | Match each quote, on its stated page, against a markdown copy of the source (hash enforced with `--strict`) |
-| Tool | [check-docx](plugins/research-kit/bin/check-docx) | Inventory and page-verify typed Word quotations without Zotero; see [Word workflow](docs/word.md) |
-| Tool | [lit-search](plugins/research-kit/bin/lit-search) | Literature search with provider receipts |
-| Tool | [pdf2md](plugins/research-kit/bin/pdf2md) | PDF to Markdown with page markers |
-| Tool | [check-claims](plugins/research-kit/bin/check-claims) | Check each cited note (runs `verify-quotes` on it) and flag uncited or unverified claims; does not judge meaning |
-| Tool | [check-bib](plugins/research-kit/bin/check-bib) | Check bibliography structure and citation coverage |
-| Tool | [build-paper](plugins/research-kit/bin/build-paper) | Build PDF, HTML or DOCX with pandoc; [Word export](docs/word-export.md) is one-way output |
-| Tool | [new-project](plugins/research-kit/bin/new-project) | Scaffold a research project |
-| Tool | [new-pipeline](plugins/research-kit/bin/new-pipeline) | Scaffold an R or Python pipeline |
-| Tool | [tribunal-scribe](plugins/research-kit/bin/tribunal-scribe) | Hash-chained verbatim record for a tribunal workspace |
-| Tool | [doctor](plugins/research-kit/bin/doctor) | Read-only setup diagnostics with per-OS fixes; see [doctor](docs/doctor.md) |
+| Skill | [new-research-project](plugins/provenote/skills/new-research-project/SKILL.md) | Scaffold a numbered project tree from a question |
+| Skill | [literature-search](plugins/provenote/skills/literature-search/SKILL.md) | Search providers, save a reading list with a receipt |
+| Skill | [pdf-to-markdown](plugins/provenote/skills/pdf-to-markdown/SKILL.md) | Convert PDFs to page-marked Markdown |
+| Skill | [literature-notes](plugins/provenote/skills/literature-notes/SKILL.md) | Write a structured note with page-pinned quotes |
+| Skill | [review-against-notes](plugins/provenote/skills/review-against-notes/SKILL.md) | Review a draft against the notes |
+| Skill | [paper-build](plugins/provenote/skills/paper-build/SKILL.md) | Check the bibliography and build PDF or HTML |
+| Skill | [analysis-pipeline](plugins/provenote/skills/analysis-pipeline/SKILL.md) | Set up and run a repeatable analysis |
+| Skill | [tribunal](plugins/provenote/skills/tribunal/SKILL.md) | Second opinion on a costly decision: sealed multi-lens review with a verbatim record |
+| Agent | [source-reader](plugins/provenote/agents/source-reader.md) | Read one source into a note |
+| Agent | [claim-checker](plugins/provenote/agents/claim-checker.md) | Judge whether notes support cited claims |
+| Agent | [skeptic](plugins/provenote/agents/skeptic.md) | Challenge the strongest claims of a draft |
+| Agent | [tribune](plugins/provenote/agents/tribune.md) | One seat of a tribunal: review through a single lens |
+| Agent | [refuter](plugins/provenote/agents/refuter.md) | Try to disprove one finding |
+| Agent | [pipeline-runner](plugins/provenote/agents/pipeline-runner.md) | Run a trusted analysis pipeline and report |
+| Tool | [verify-quotes](plugins/provenote/bin/verify-quotes) | Match each quote, on its stated page, against a markdown copy of the source (hash enforced with `--strict`) |
+| Tool | [check-docx](plugins/provenote/bin/check-docx) | Inventory and page-verify typed Word quotations without Zotero; see [Word workflow](docs/word.md) |
+| Tool | [lit-search](plugins/provenote/bin/lit-search) | Literature search with provider receipts |
+| Tool | [pdf2md](plugins/provenote/bin/pdf2md) | PDF to Markdown with page markers |
+| Tool | [check-claims](plugins/provenote/bin/check-claims) | Check each cited note (runs `verify-quotes` on it) and flag uncited or unverified claims; does not judge meaning |
+| Tool | [check-bib](plugins/provenote/bin/check-bib) | Check bibliography structure and citation coverage |
+| Tool | [build-paper](plugins/provenote/bin/build-paper) | Build PDF, HTML or DOCX with pandoc; [Word export](docs/word-export.md) is one-way output |
+| Tool | [new-project](plugins/provenote/bin/new-project) | Scaffold a research project |
+| Tool | [new-pipeline](plugins/provenote/bin/new-pipeline) | Scaffold an R or Python pipeline |
+| Tool | [tribunal-scribe](plugins/provenote/bin/tribunal-scribe) | Hash-chained verbatim record for a tribunal workspace |
+| Tool | [doctor](plugins/provenote/bin/doctor) | Read-only setup diagnostics with per-OS fixes; see [doctor](docs/doctor.md) |
 
 The [complete catalog](CATALOG.md) lists inputs, outputs and dependencies; the
 [adapter guide](docs/adapters.md) covers manual use with other assistants.
@@ -83,8 +87,8 @@ run from its root:
 
 ```sh
 cd examples/basic
-python3 ../../plugins/research-kit/bin/verify-quotes --strict 01_notes/lit/*.md
-python3 ../../plugins/research-kit/bin/verify-quotes --strict 01_notes/negative/*.md
+python3 ../../plugins/provenote/bin/verify-quotes --strict 01_notes/lit/*.md
+python3 ../../plugins/provenote/bin/verify-quotes --strict 01_notes/negative/*.md
 ```
 
 The first prints **14 of 14 PASS**; the second reports the planted fabrication as

@@ -1,4 +1,4 @@
-## research-kit X.Y.Z
+## provenote X.Y.Z
 
 One or two sentences: what this release is for and who should upgrade.
 
@@ -28,9 +28,12 @@ route, or the Codex adapter in INSTALL.md).
 Upgrade an existing install:
 
 ```text
-/plugin marketplace update research-kit
-/plugin update research-kit@research-kit
+/plugin marketplace update provenote
+/plugin update provenote@provenote
 ```
+
+For a release that renames the plugin or marketplace, replace this upgrade block with that
+release's migration steps from CHANGELOG.md: the commands above fail for users of the old name.
 
 External tools (Poppler, pandoc, optional Typst): see
 INSTALL.md, section "Install the external tools (one command)".

@@ -1,9 +1,28 @@
 # Changelog
 
-## Unreleased
+## 0.2.0
+
+### Renamed
+
+The project is now **Provenote** (plugin ID, marketplace and repository: `provenote`; formerly
+`research-kit`). The old repository URL redirects, but plugin and marketplace IDs do not. To
+migrate in Claude Code:
+
+```text
+/plugin uninstall research-kit@research-kit
+/plugin marketplace remove research-kit
+/plugin marketplace add nik110403/provenote
+/plugin install provenote@provenote
+```
+
+Skills and agents are now namespaced `provenote:` instead of `research-kit:`. For Codex, delete the
+old `<project>/.agents/skills/research-kit/` folder and install the adapter again into
+`<project>/.agents/skills/provenote/` ([INSTALL.md](INSTALL.md#upgrading-from-research-kit)); invoke it
+as `$provenote`. Scripts that call `plugins/research-kit/bin/...` must use `plugins/provenote/bin/...`.
+The denylist environment variable for `scripts/leak-check.sh` is now `PROVENOTE_DENYLIST` (default file
+`~/.config/provenote/denylist`).
 
 ### Changed
-
 - README restructured around install, a demo and a 30-second example; the full tool table is folded
   into a collapsible section. [INSTALL.md](INSTALL.md) gains an "Install the external tools" section.
 

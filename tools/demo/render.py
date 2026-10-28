@@ -16,7 +16,7 @@ import sys
 import textwrap
 from xml.sax.saxutils import escape
 
-PUBLIC_ROOT = "~/research-kit/tools/demo/fixture"
+PUBLIC_ROOT = "~/provenote/tools/demo/fixture"
 WIDTH_CH = 92          # wrap column
 CH_W, LINE_H, FS = 8.4, 19, 14
 PAD_X, TOP = 28, 52
@@ -139,6 +139,8 @@ def svg(items, theme):
                         f'<set attributeName="visibility" to="visible" begin="{t:.2f}s" fill="freeze"/></text>')
             t += 0.28 if kind != "claude" else 0.45
         prev = kind
+    parts.append("<style>@media (prefers-reduced-motion: reduce){"
+                 "text{visibility:visible !important;clip-path:none !important}}</style>")
     parts.append("<defs>" + "".join(defs) + "</defs>")
     parts += body
     parts.append("</svg>")

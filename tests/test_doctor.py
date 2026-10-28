@@ -13,7 +13,7 @@ from unittest.mock import patch
 
 
 ROOT = Path(__file__).resolve().parent.parent
-TOOL = ROOT / "plugins/research-kit/bin/doctor"
+TOOL = ROOT / "plugins/provenote/bin/doctor"
 loader = importlib.machinery.SourceFileLoader("doctor", str(TOOL))
 spec = importlib.util.spec_from_loader(loader.name, loader)
 doctor = importlib.util.module_from_spec(spec)
@@ -173,7 +173,7 @@ class Doctor(unittest.TestCase):
         self.assertEqual(self.ids("word"), ["path.helper-shadowed"])
 
     def test_adapter_only_compares_proven_existing_helpers(self):
-        adapter = self.project / ".agents/skills/research-kit/bin"
+        adapter = self.project / ".agents/skills/provenote/bin"
         adapter.mkdir(parents=True)
         # Missing files are not proof of a stale copy (e.g. an older inventory).
         self.assertEqual(self.ids("word"), [])

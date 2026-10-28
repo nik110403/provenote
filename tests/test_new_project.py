@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-TOOL = Path(__file__).resolve().parent.parent / "plugins/research-kit/bin/new-project"
+TOOL = Path(__file__).resolve().parent.parent / "plugins/provenote/bin/new-project"
 DIRS = ["00_admin", "01_notes", "02_sources", "03_code", "05_figures",
         "06_tables", "07_references", "10_paper"]
 SUBDIRS = ["02_sources/pdf", "01_notes/lit"]

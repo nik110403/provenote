@@ -20,7 +20,7 @@ decryption tools are conditional on the input and are checked separately.
 pdf2md 02_sources/pdf/*.pdf --out 02_sources/md/
 ```
 
-If `pdf2md` is not on PATH, run it from the kit's `plugins/research-kit/bin/`.
+If `pdf2md` is not on PATH, run it from the kit's `plugins/provenote/bin/`.
 
 On operational failure, follow `../../templates/agent-recovery.md` relative to
 this skill directory. Limit recovery to two environment-only attempts; never

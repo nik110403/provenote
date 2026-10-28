@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-TOOL = Path(__file__).resolve().parent.parent / "plugins/research-kit/bin/verify-quotes"
+TOOL = Path(__file__).resolve().parent.parent / "plugins/provenote/bin/verify-quotes"
 
 _loader = importlib.machinery.SourceFileLoader("verify_quotes", str(TOOL))
 vq = importlib.util.module_from_spec(importlib.util.spec_from_loader("verify_quotes", _loader))

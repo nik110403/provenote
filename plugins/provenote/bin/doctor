@@ -59,7 +59,7 @@ def canonical_bin(helper):
     candidate = helper.parent
     marker = candidate.parent / ".claude-plugin/plugin.json"
     try:
-        if candidate.name == "bin" and json.loads(marker.read_text(encoding="utf-8")).get("name") == "research-kit":
+        if candidate.name == "bin" and json.loads(marker.read_text(encoding="utf-8")).get("name") == "provenote":
             return candidate
     except (OSError, ValueError, AttributeError):
         pass
@@ -113,7 +113,7 @@ def diagnose(workflow, project=None):
                 + "; this plugin bin: " + str(helper.parent), path_fix)
 
     if canonical:
-        adapter = project / ".agents/skills/research-kit/bin"
+        adapter = project / ".agents/skills/provenote/bin"
         if adapter.is_dir() and adapter.resolve() != canonical:
             for name in HELPERS:
                 left, right = canonical / name, adapter / name

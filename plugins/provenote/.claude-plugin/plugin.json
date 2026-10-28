@@ -1,6 +1,6 @@
 {
-  "name": "research-kit",
-  "version": "0.1.3",
+  "name": "provenote",
+  "version": "0.2.0",
   "description": "Skills, agents and tools for source-grounded research projects: PDF to markdown, literature notes, quote verification.",
   "author": { "name": "Nik Khosravipour", "url": "https://github.com/nik110403" },
   "license": "MIT"

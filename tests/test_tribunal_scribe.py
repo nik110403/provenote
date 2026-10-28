@@ -10,7 +10,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-SCRIBE = Path(__file__).resolve().parent.parent / "plugins/research-kit/bin/tribunal-scribe"
+SCRIBE = Path(__file__).resolve().parent.parent / "plugins/provenote/bin/tribunal-scribe"
 
 
 def sha256(data: bytes) -> str:

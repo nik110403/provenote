@@ -23,6 +23,7 @@ jobs:
           mkdir -p site/fonts
           cp tools/banner/fonts/* site/fonts/
           cp assets/demo-light.svg assets/demo-dark.svg site/
+          cp assets/social-preview.png site/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site

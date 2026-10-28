@@ -3,8 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>research-kit: source-grounded research for Claude Code</title>
+<title>Provenote: source-grounded research for Claude Code</title>
 <meta name="description" content="Turn a reading list into notes whose every quote is checked against its page, check a draft against those notes, and build the paper.">
+<link rel="canonical" href="https://nik110403.github.io/provenote/">
+<meta property="og:title" content="Provenote: source-grounded research for Claude Code">
+<meta property="og:description" content="Turn a reading list into notes whose every quote is checked against its page, check a draft against those notes, and build the paper.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://nik110403.github.io/provenote/">
+<meta property="og:image" content="https://nik110403.github.io/provenote/social-preview.png">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#faf7f2" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f0d0a" media="(prefers-color-scheme: dark)">
@@ -16,12 +23,12 @@
 <a class="skip" href="#install">Skip to install</a>
 
 <header class="top">
-  <p class="brand"><span class="mark">research-kit</span> <span class="tag">early-stage Claude Code plugin</span></p>
+  <p class="brand"><span class="mark">Provenote</span> <span class="tag">early-stage Claude Code plugin</span></p>
   <nav aria-label="Project links">
-    <a href="https://github.com/nik110403/research-kit">GitHub</a>
+    <a href="https://github.com/nik110403/provenote">GitHub</a>
     <a href="#install">Install</a>
-    <a href="https://github.com/nik110403/research-kit/blob/main/CATALOG.md">Catalog</a>
-    <a href="https://github.com/nik110403/research-kit/blob/main/CHANGELOG.md">Changelog</a>
+    <a href="https://github.com/nik110403/provenote/blob/main/CATALOG.md">Catalog</a>
+    <a href="https://github.com/nik110403/provenote/blob/main/CHANGELOG.md">Changelog</a>
   </nav>
 </header>
 
@@ -34,17 +41,18 @@
 
 <section id="install" class="install" aria-labelledby="install-h">
   <h2 id="install-h">Install</h2>
+  <p class="note">Upgrading from research-kit? Remove the old plugin before installing; see the <a href="https://github.com/nik110403/provenote/blob/main/INSTALL.md#upgrading-from-research-kit">upgrade&nbsp;steps</a>.</p>
   <p>In Claude Code, with Git installed:</p>
   <div class="cmd">
-    <pre><code>/plugin marketplace add nik110403/research-kit</code></pre>
+    <pre><code>/plugin marketplace add nik110403/provenote</code></pre>
     <button type="button" class="copy" aria-label="Copy the marketplace add command">Copy</button>
   </div>
   <div class="cmd">
-    <pre><code>/plugin install research-kit@research-kit</code></pre>
+    <pre><code>/plugin install provenote@provenote</code></pre>
     <button type="button" class="copy" aria-label="Copy the plugin install command">Copy</button>
   </div>
   <p class="status" id="copy-status" role="status" aria-live="polite"></p>
-  <p class="note">Then ask Claude to start a research project, search the literature, or verify notes. A Codex adapter exists too; see the <a href="https://github.com/nik110403/research-kit/blob/main/INSTALL.md">install guide</a>.</p>
+  <p class="note">Then ask Claude to start a research project, search the literature, or verify notes. A Codex adapter exists too; see the <a href="https://github.com/nik110403/provenote/blob/main/INSTALL.md">install guide</a>.</p>
 </section>
 
 <section class="demo" aria-labelledby="demo-h">
@@ -68,7 +76,7 @@ advisory: draft-quote check is heuristic; run with --strict-quotes to make it fa
 - Line 5 isn't backed: "flexibility cushions every economy, including the eurozone, by roughly 4 percent of GDP." The quote isn't word-for-word in the source. The note also says the reverse: there's no effect in the eurozone, and no "4 percent" figure appears anywhere.
 - Line 9 isn't backed: "labour reform is the only free lunch left in macroeconomics." It has no citation, and no note supports it.
 - Lines 3 and 7 are backed by the note's claims. Separately, the strict check failed on `01_notes/negative/lei2023financial.md`: its quote 1 (p. 1) isn't in the source. That's a problem in the note, not the draft. I didn't edit any files.</code></pre>
-  <p class="note">A real Claude Code run on a small demo project (about 18 seconds, plays once; <a href="https://github.com/nik110403/research-kit/blob/main/tools/demo/README.md">how it was made</a>). Six quotes pass, one planted fabrication fails, and the draft's invented quote and uncited quotation are flagged. The sources ship with the repository.</p>
+  <p class="note">A real Claude Code run on a small demo project (about 18 seconds, plays once; <a href="https://github.com/nik110403/provenote/blob/main/tools/demo/README.md">how it was made</a>). Six quotes pass, one planted fabrication fails, and the draft's invented quote and uncited quotation are flagged. The sources ship with the repository.</p>
 </section>
 
 <section class="outcomes" aria-labelledby="out-h">
@@ -97,18 +105,18 @@ advisory: draft-quote check is heuristic; run with --strict-quotes to make it fa
 
 <section id="verified" class="verified" aria-labelledby="ver-h">
   <h2 id="ver-h">What is and is not verified</h2>
-  <p>The check is narrow: each quote appears, on its stated page, in a hashed Markdown copy of the source (hash enforced with <code>--strict</code>). It does not show that the copy matches the original PDF, that the quote supports the claim, or that the claim is true. Those stay with a model or with you. <a href="https://github.com/nik110403/research-kit/blob/main/docs/verification.md">Read the full boundary</a>.</p>
+  <p>The check is narrow: each quote appears, on its stated page, in a hashed Markdown copy of the source (hash enforced with <code>--strict</code>). It does not show that the copy matches the original PDF, that the quote supports the claim, or that the claim is true. Those stay with a model or with you. <a href="https://github.com/nik110403/provenote/blob/main/docs/verification.md">Read the full boundary</a>.</p>
 </section>
 </main>
 
 <footer>
   <nav aria-label="More">
-    <a href="https://github.com/nik110403/research-kit">GitHub</a>
-    <a href="https://github.com/nik110403/research-kit/blob/main/INSTALL.md">Install guide</a>
-    <a href="https://github.com/nik110403/research-kit/blob/main/CATALOG.md">Catalog</a>
-    <a href="https://github.com/nik110403/research-kit/blob/main/CHANGELOG.md">Changelog</a>
+    <a href="https://github.com/nik110403/provenote">GitHub</a>
+    <a href="https://github.com/nik110403/provenote/blob/main/INSTALL.md">Install guide</a>
+    <a href="https://github.com/nik110403/provenote/blob/main/CATALOG.md">Catalog</a>
+    <a href="https://github.com/nik110403/provenote/blob/main/CHANGELOG.md">Changelog</a>
   </nav>
-  <p>Code, skills and agents: <a href="https://github.com/nik110403/research-kit/blob/main/LICENSE">MIT</a>. Documentation: <a href="https://github.com/nik110403/research-kit/blob/main/LICENSE-docs">CC BY 4.0</a>. Typefaces Fraunces, Space Grotesk and Atkinson Hyperlegible: <a href="fonts/OFL.txt">SIL Open Font License 1.1</a>. Full <a href="https://github.com/nik110403/research-kit/blob/main/LICENSING.md">licensing map</a>.</p>
+  <p>Code, skills and agents: <a href="https://github.com/nik110403/provenote/blob/main/LICENSE">MIT</a>. Documentation: <a href="https://github.com/nik110403/provenote/blob/main/LICENSE-docs">CC BY 4.0</a>. Typefaces Fraunces, Space Grotesk and Atkinson Hyperlegible: <a href="fonts/OFL.txt">SIL Open Font License 1.1</a>. Full <a href="https://github.com/nik110403/provenote/blob/main/LICENSING.md">licensing map</a>.</p>
 </footer>
 
 <script>

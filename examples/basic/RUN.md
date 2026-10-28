@@ -7,7 +7,7 @@ repo root except step 3, where an agent writes the notes.
 ## 1. Project skeleton
 
 ```sh
-plugins/research-kit/bin/new-project examples/basic
+plugins/provenote/bin/new-project examples/basic
 ```
 
 This creates the numbered directories, `CLAUDE.md`, `00_admin/TASKLIST.md`, `00_admin/progress.md`,
@@ -18,7 +18,7 @@ This creates the numbered directories, `CLAUDE.md`, `00_admin/TASKLIST.md`, `00_
 The PDFs were downloaded from the URLs in `SOURCES.md` into `02_sources/pdf/`.
 
 ```sh
-plugins/research-kit/bin/pdf2md examples/basic/02_sources/pdf/*.pdf --out examples/basic/02_sources/md/
+plugins/provenote/bin/pdf2md examples/basic/02_sources/pdf/*.pdf --out examples/basic/02_sources/md/
 ```
 
 Result (`02_sources/manifest.csv`):
@@ -45,7 +45,7 @@ The notes in this directory are the agents' output, saved unedited.
 
 ```sh
 cd examples/basic
-../../plugins/research-kit/bin/verify-quotes --strict 01_notes/lit/*.md
+../../plugins/provenote/bin/verify-quotes --strict 01_notes/lit/*.md
 ```
 
 Result: 14 of 14 quotes PASS, exit 0.
@@ -56,7 +56,7 @@ Result: 14 of 14 quotes PASS, exit 0.
 a real source.
 
 ```sh
-../../plugins/research-kit/bin/verify-quotes --strict 01_notes/negative/*.md
+../../plugins/provenote/bin/verify-quotes --strict 01_notes/negative/*.md
 ```
 
 Result: `FAIL lei2023financial.md: quote 1 (p. 1): text not found in source` (the only failure), exit 1.

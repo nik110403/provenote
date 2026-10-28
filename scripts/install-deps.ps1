@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-  Install the external tools the research-kit helpers need (Windows).
+  Install the external tools the provenote helpers need (Windows).
 .DESCRIPTION
   winget first, choco fallback. -Workflow pdf|build|all, -Typst, -DryRun, -Yes.
   Ends by running doctor and exiting with its code. Exit 3: no package manager.
@@ -12,9 +12,9 @@ param(
     [switch]$Yes
 )
 $ErrorActionPreference = 'Stop'
-$doctor = Join-Path $PSScriptRoot '..\plugins\research-kit\bin\doctor'
+$doctor = Join-Path $PSScriptRoot '..\plugins\provenote\bin\doctor'
 
-# tool -> winget id / choco id (mirrors plugins/research-kit/bin/doctor)
+# tool -> winget id / choco id (mirrors plugins/provenote/bin/doctor)
 $catalog = @{
     pdftotext = @{ winget = 'oschwartz10612.Poppler'; choco = 'poppler' }
     pandoc    = @{ winget = 'JohnMacFarlane.Pandoc'; choco = 'pandoc' }

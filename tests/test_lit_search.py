@@ -9,7 +9,7 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-TOOL = ROOT / "plugins/research-kit/bin/lit-search"
+TOOL = ROOT / "plugins/provenote/bin/lit-search"
 FIX = ROOT / "tests/fixtures/search"
 
 loader = importlib.machinery.SourceFileLoader("lit_search", str(TOOL))

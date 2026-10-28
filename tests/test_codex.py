@@ -27,7 +27,7 @@ class CodexInstall(unittest.TestCase):
             project.mkdir()
             first = self.install(project)
             self.assertEqual(first.returncode, 0, first.stderr)
-            skill = project / ".agents/skills/research-kit"
+            skill = project / ".agents/skills/provenote"
             for name in (
                 "SKILL.md",
                 "bin/verify-quotes",
@@ -55,7 +55,7 @@ class CodexInstall(unittest.TestCase):
     def test_collision_is_preserved(self):
         with tempfile.TemporaryDirectory() as temp:
             project = Path(temp)
-            target = project / ".agents/skills/research-kit"
+            target = project / ".agents/skills/provenote"
             target.mkdir(parents=True)
             marker = target / "marker"
             marker.write_text("keep", encoding="utf-8")
@@ -68,7 +68,7 @@ class CodexInstall(unittest.TestCase):
             project = Path(temp)
             (project / ".agents/skills").mkdir(parents=True)
             try:
-                os.symlink(project, project / ".agents/skills/research-kit")
+                os.symlink(project, project / ".agents/skills/provenote")
             except OSError as error:
                 self.skipTest(f"symlink creation unavailable: {error}")
             result = self.install(project)
@@ -103,7 +103,7 @@ class CodexInstall(unittest.TestCase):
             self.assertEqual(self.install(project).returncode, 0)
             example = project / "example"
             shutil.copytree(ROOT / "examples/basic", example)
-            helper = project / ".agents/skills/research-kit/bin/verify-quotes"
+            helper = project / ".agents/skills/provenote/bin/verify-quotes"
             result = subprocess.run(
                 [
                     sys.executable,

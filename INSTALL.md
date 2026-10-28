@@ -5,21 +5,21 @@
 In Claude Code, add the public marketplace and install its plugin:
 
 ```text
-/plugin marketplace add nik110403/research-kit
-/plugin install research-kit@research-kit
+/plugin marketplace add nik110403/provenote
+/plugin install provenote@provenote
 ```
 
 This loads the packaged eight skills and six roles from the canonical
-`plugins/research-kit/` tree. It does not install Python, Poppler, pandoc, R or
+`plugins/provenote/` tree. It does not install Python, Poppler, pandoc, R or
 optional dependencies. Do not replace your existing settings, `CLAUDE.md`,
 `AGENTS.md` or permission policy with this collection's examples.
 
 For predictable command paths, keep a checkout of
-[research-kit](https://github.com/nik110403/research-kit). In a POSIX shell **at
+[Provenote](https://github.com/nik110403/provenote). In a POSIX shell **at
 the checkout root**, set:
 
 ```sh
-KIT="$(pwd)/plugins/research-kit"
+KIT="$(pwd)/plugins/provenote"
 ```
 
 `KIT` below must remain an absolute path. Run `python3 "$KIT/bin/verify-quotes"
@@ -28,6 +28,28 @@ bare tool names: either add this directory for the current shell with
 `export PATH="$KIT/bin:$PATH"` (and ensure executable permission), or explicitly
 give your assistant the absolute tool path. A Markdown skill is not a PATH setup
 mechanism; changing directories alone will not resolve a bare command.
+
+## Upgrading from research-kit
+
+Provenote was called research-kit before 0.2.0. An existing research-kit install stops loading
+("Plugin research-kit not found in marketplace research-kit") as soon as its marketplace is
+refreshed, by hand or by auto-update, because the marketplace now lists only `provenote`. Move to
+the new name in Claude Code:
+
+```text
+/plugin uninstall research-kit@research-kit
+/plugin marketplace remove research-kit
+/plugin marketplace add nik110403/provenote
+/plugin install provenote@provenote
+```
+
+For Codex, delete the old `<project>/.agents/skills/research-kit/` folder, then install the
+adapter again into `<project>/.agents/skills/provenote/` as described in the Codex adapter
+section below, and invoke it as `$provenote`.
+
+If you followed an older guide and `/plugin install research-kit@research-kit` fails, the
+marketplace you just added is already called `provenote`: run `/plugin install provenote@provenote`
+instead.
 
 ## Install the external tools (one command)
 
@@ -161,9 +183,9 @@ for PDF, and explicitly writes HTML if neither engine exists; use `--to html` or
 `--to docx` to select a format. On Windows PowerShell, for example:
 
 ```powershell
-$researchKit = (Resolve-Path .\plugins\research-kit)
-python "$researchKit\bin\verify-quotes" --strict 01_notes/lit/lei2023financial.md
-python "$researchKit\bin\build-paper" --to html
+$provenoteKit = (Resolve-Path .\plugins\provenote)
+python "$provenoteKit\bin\verify-quotes" --strict 01_notes/lit/lei2023financial.md
+python "$provenoteKit\bin\build-paper" --to html
 ```
 
 For a static DOCX export styled with a pandoc reference document, see the
@@ -174,18 +196,18 @@ commands, template creation, and the one-way/static-citation limits.
 
 Install one self-contained Codex skill into an existing project; it does not alter
 `AGENTS.md`, global configuration, or the Claude plugin. The skill is discovered
-from `<project>/.agents/skills/research-kit/`, so use a project you intend Codex to
+from `<project>/.agents/skills/provenote/`, so use a project you intend Codex to
 work in.
 
 #### No Git or Python: copy with a file manager
 
 On GitHub, choose **Code → Download ZIP**, extract the archive, and open its
-`research-kit` folder in your file manager. In the project where you use Codex,
+`provenote` folder in your file manager. In the project where you use Codex,
 create `.agents`, then `skills` inside it (enable hidden files first if `.agents`
-is not visible). Create the final `research-kit` folder once, so the result is:
+is not visible). Create the final `provenote` folder once, so the result is:
 
 ```text
-<project>/.agents/skills/research-kit/
+<project>/.agents/skills/provenote/
   SKILL.md
   bin/
   templates/
@@ -195,16 +217,16 @@ is not visible). Create the final `research-kit` folder once, so the result is:
 
 Copy `docs/codex/SKILL.md` from the extracted repository into that final folder and
 name it `SKILL.md`. Copy `bin/`, `templates/`, and `agents/` from
-`plugins/research-kit/` alongside it. Finally copy the **whole**
-`plugins/research-kit/skills/` folder there and rename that copied folder
-`workflows/`. Do not copy a folder named `research-kit` into the final
-`research-kit` folder: that creates redundant nesting and prevents the expected
+`plugins/provenote/` alongside it. Finally copy the **whole**
+`plugins/provenote/skills/` folder there and rename that copied folder
+`workflows/`. Do not copy a folder named `provenote` into the final
+`provenote` folder: that creates redundant nesting and prevents the expected
 layout.
 
-Before copying, stop if `<project>/.agents/skills/research-kit/` already exists.
+Before copying, stop if `<project>/.agents/skills/provenote/` already exists.
 Back it up and compare it; do not overwrite a destination or instructions you did
-not inspect. Restart Codex after copying, then explicitly ask: `$research-kit show
-me the available research-kit workflows; do not run helpers yet.` This checks skill
+not inspect. Restart Codex after copying, then explicitly ask: `$provenote show
+me the available Provenote workflows; do not run helpers yet.` This checks skill
 discovery only. It does **not** prove that research helpers work.
 
 Copying or loading these Markdown instructions needs no Python. Python 3.9+ is
@@ -225,7 +247,7 @@ python3 scripts/install-codex.py --project /absolute/path/to/project
 python .\scripts\install-codex.py --project C:\path\to\project
 ```
 
-The installed skill is `.agents/skills/research-kit/`. Set `$researchKit` to that
+The installed skill is `.agents/skills/provenote/`. Set `$provenoteKit` to that
 path when prompting Codex to run a clean quote demo. R and any analysis packages belong to the chosen
 pipeline environment; `uv` and `renv` are optional environment-management tools.
 

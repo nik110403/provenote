@@ -56,8 +56,8 @@ and ask it to return its required table. Expect the same two statuses. These smo
 confirm that an instruction can be found and followed. They do not establish
 independent review or validate research evidence.
 
-For fuller patterns, reuse the real [skills](../plugins/research-kit/skills/),
-[agents](../plugins/research-kit/agents/), and [adapter guidance](adapters.md) in
+For fuller patterns, reuse the real [skills](../plugins/provenote/skills/),
+[agents](../plugins/provenote/agents/), and [adapter guidance](adapters.md) in
 this repository. They carry workflow-specific dependencies and limits. You may
 copy and modify the starters under the [MIT License](../LICENSE); retain the
 required notice in substantial copies.

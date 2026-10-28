@@ -8,7 +8,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-BIN = Path(__file__).resolve().parent.parent / "plugins/research-kit/bin"
+BIN = Path(__file__).resolve().parent.parent / "plugins/provenote/bin"
 NAME = "Gr\u00e9gory \u010capek \u2014 \u00fc"
 
 ENV = dict(

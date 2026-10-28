@@ -8,7 +8,7 @@ skill discovery**. Neither imports Claude's agent permissions automatically.
 ## Manual workflow and role adaptation
 
 1. Choose a stage from the [catalog](../CATALOG.md). Read its `SKILL.md`, support
-   assets and required role contracts from `plugins/research-kit/`.
+   assets and required role contracts from `plugins/provenote/`.
 2. Give the assistant the actual project paths and absolute tool paths. Translate
    commands to the available terminal interface; run them from the research
    project root, or from the pipeline directory for `run_all.py` / `run_all.R`.
@@ -42,7 +42,7 @@ documentation before relying on a path in a different version.
 
 For Codex, use `python3 scripts/install-codex.py --project <project-dir>` (or
 `python .\scripts\install-codex.py --project <project-dir>` in PowerShell). It
-copies a self-contained `.agents/skills/research-kit/` with helpers, templates,
+copies a self-contained `.agents/skills/provenote/` with helpers, templates,
 workflow assets and role contracts. It neither creates nor overwrites `AGENTS.md`.
 Discovery makes instructions available; it does not import Claude permissions.
 

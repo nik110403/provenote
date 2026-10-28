@@ -46,7 +46,7 @@ def http_get(url, accept="application/json", opener=urllib.request.urlopen, slee
     for attempt in range(2):
         try:
             req = urllib.request.Request(url, headers={
-                "Accept": accept, "User-Agent": "research-kit-lit-search/1.0", **(headers or {})})
+                "Accept": accept, "User-Agent": "provenote-lit-search/1.0", **(headers or {})})
             with opener(req, timeout=30) as r:
                 return r.read().decode("utf-8", "replace")
         except urllib.error.HTTPError as e:

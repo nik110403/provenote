@@ -9,7 +9,7 @@ import unittest
 import zipfile
 from pathlib import Path
 
-TOOL = Path(__file__).resolve().parent.parent / "plugins/research-kit/bin/check-docx"
+TOOL = Path(__file__).resolve().parent.parent / "plugins/provenote/bin/check-docx"
 SOURCE = (
     Path(__file__).resolve().parent.parent
     / "examples/basic/02_sources/md/lei2023financial.md"

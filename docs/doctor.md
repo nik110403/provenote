@@ -3,11 +3,11 @@
 Run from the research project root, using the intended plugin's helper:
 
 ```sh
-python3 /path/to/research-kit/bin/doctor --workflow pdf
-python3 /path/to/research-kit/bin/doctor --workflow all --json
+python3 /path/to/provenote/bin/doctor --workflow pdf
+python3 /path/to/provenote/bin/doctor --workflow all --json
 ```
 
-In PowerShell use `py -3 "C:\path\to\research-kit\bin\doctor" --workflow word`.
+In PowerShell use `py -3 "C:\path\to\provenote\bin\doctor" --workflow word`.
 If Python cannot start, select/install Python 3.9+ first; no Python program can
 diagnose an interpreter that cannot parse or launch it.
 
@@ -69,8 +69,8 @@ not proof that a future write will succeed under every ACL or mount condition.
 
 An adapter helper is reported stale only when both files exist and their bytes
 differ from the plugin containing this doctor. That plugin must have the
-`research-kit` marker at `.claude-plugin/plugin.json`; no checkout/cache path is
-guessed. Comparison covers `.agents/skills/research-kit/bin` under the project.
+`provenote` marker at `.claude-plugin/plugin.json`; no checkout/cache path is
+guessed. Comparison covers `.agents/skills/provenote/bin` under the project.
 Standalone adapters without the marker cannot establish a canonical plugin and
 skip comparison. Missing/unreadable files and other adapter locations are not
 proof of stale copies; this is not an adapter completeness check. No copy is
@@ -78,7 +78,7 @@ overwritten. Helper PATH checks compare against this doctor's own bin directory.
 
 ## Recovery
 
-Follow the bundled [agent recovery template](../plugins/research-kit/templates/agent-recovery.md):
+Follow the bundled [agent recovery template](../plugins/provenote/templates/agent-recovery.md):
 doctor → smallest proposed fix → existing permission approval → apply → rerun
 doctor → retry the original command. Allow at most two attempts per finding,
 then report evidence and remaining work. Never edit research notes, sources,

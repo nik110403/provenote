@@ -7,7 +7,7 @@ Requires: Python 3.9+ (uv recommended); R for the R variant.
 
 # Analysis pipeline
 
-1. Scaffold: `new-pipeline <dir> --lang python` (or `--lang r`). If not on PATH, run it from the kit's plugins/research-kit/bin/.
+1. Scaffold: `new-pipeline <dir> --lang python` (or `--lang r`). If not on PATH, run it from the kit's plugins/provenote/bin/.
 2. Add steps as `src/02_*.py`, `src/03_*.py` ... (R: `.R`); they run in numeric order. One command rebuilds everything: `run_all.py` / `run_all.R`.
 3. Run via the `pipeline-runner` agent. It executes arbitrary project code, so run only pipelines you trust. It reports PASS/FAIL, warnings and changed outputs; it never edits.
 

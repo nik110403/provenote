@@ -10,7 +10,7 @@ ordinary straight double quotes (`"…"`) and English curly double quotes
 Word file is elsewhere.
 
 ```sh
-python3 "/absolute/path/to/research-kit/plugins/research-kit/bin/check-docx" \
+python3 "/absolute/path/to/provenote/plugins/provenote/bin/check-docx" \
   --root "/absolute/path/to/project" --inventory "/absolute/path/to/new-word-quotes.csv" \
   "/absolute/path/to/lecture.docx"
 ```
@@ -21,7 +21,7 @@ assistant, select that mapping. The checker does not infer it from typed
 citations or references. Then verify, optionally creating fresh reports:
 
 ```powershell
-& python "C:\absolute\path\to\research-kit\plugins\research-kit\bin\check-docx" `
+& python "C:\absolute\path\to\provenote\plugins\provenote\bin\check-docx" `
   --root "C:\research\project" --bindings "C:\research\word-quotes.csv" `
   --report "C:\research\word-check" "C:\lecture.docx"
 ```
@@ -58,4 +58,4 @@ reverses that prefix when it reads a bindings CSV (including Excel's UTF-8 BOM),
 always use the original text.
 
 Run the bundled offline demonstration with `python3 examples/word/RUN.py --out
-/tmp/research-kit-word-demo`. It needs local `pandoc` but no network or model.
+/tmp/provenote-word-demo`. It needs local `pandoc` but no network or model.

@@ -14,7 +14,7 @@ EMAIL = "jane@" + "example.org"
 PUBLIC_HANDLE = "nik" + "110403"
 PUBLIC_URLS = tuple(
     "https://github.com/" + PUBLIC_HANDLE + "/" + repo
-    for repo in ("research-kit", "ai-architecture")
+    for repo in ("provenote", "ai-architecture")
 )
 PUBLIC_DOCS = (
     "README.md",
@@ -135,7 +135,7 @@ class LeakCheck(unittest.TestCase):
         self.git("add", "f.txt")
         env = dict(
             os.environ,
-            RESEARCH_KIT_DENYLIST=str(
+            PROVENOTE_DENYLIST=str(
                 self.deny if deny else self.tmp.name + "/missing"
             ),
         )
@@ -175,7 +175,7 @@ class LeakCheck(unittest.TestCase):
         self.assertEqual(self.run_check("clean").returncode, 1)
 
     def test_author_lines_exempt_only_in_metadata(self):
-        env = dict(os.environ, RESEARCH_KIT_DENYLIST=str(self.deny))
+        env = dict(os.environ, PROVENOTE_DENYLIST=str(self.deny))
 
         def check(name, content):
             (self.repo / name).write_text(content + "\n", encoding="utf-8")
@@ -196,14 +196,14 @@ class LeakCheck(unittest.TestCase):
         self.assertEqual(check("LICENSE", "Thanks to SecretProject"), 1)
         self.assertEqual(check("README.md", "Copyright (c) 2026 SecretProject"), 1)
         self.assertEqual(
-            check("README.md", "/plugin marketplace add SecretProject/research-kit"), 0
+            check("README.md", "/plugin marketplace add SecretProject/provenote"), 0
         )
-        self.assertEqual(check("README.md", "see SecretProject/research-kit"), 1)
+        self.assertEqual(check("README.md", "see SecretProject/provenote"), 1)
 
     def test_banner_footer_default_allowed_on_exact_line_only(self):
         line = '    p.add_argument("--footer", default="secretproject.com")'
         self.deny.write_text("secretproject\n", encoding="utf-8")
-        env = dict(os.environ, RESEARCH_KIT_DENYLIST=str(self.deny))
+        env = dict(os.environ, PROVENOTE_DENYLIST=str(self.deny))
         for name, text, want in (
             ("tools/banner/bin/make-banner", line, 0),
             ("tools/banner/bin/make-banner", line + " # secretproject", 1),
@@ -261,7 +261,7 @@ class LeakCheck(unittest.TestCase):
         self.git("commit", "-qm", "x")
         (self.repo / "f.txt").write_text("clean\n", encoding="utf-8")
         self.git("commit", "-qam", "y")
-        env = dict(os.environ, RESEARCH_KIT_DENYLIST=str(self.deny))
+        env = dict(os.environ, PROVENOTE_DENYLIST=str(self.deny))
         run = lambda m: subprocess.run(
             [BASH, str(SCRIPT), m],
             cwd=self.repo,
@@ -282,7 +282,7 @@ class LeakCheck(unittest.TestCase):
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(content + "\n", encoding="utf-8")
         self.git("add", name)
-        env = dict(os.environ, RESEARCH_KIT_DENYLIST=str(self.deny))
+        env = dict(os.environ, PROVENOTE_DENYLIST=str(self.deny))
         try:
             result = subprocess.run(
                 [BASH, str(SCRIPT), mode],
@@ -336,8 +336,8 @@ class LeakCheck(unittest.TestCase):
 
     def test_site_page_allowances_are_anchored(self):
         owner = PUBLIC_HANDLE
-        base = "https://github.com/" + owner + "/research-kit"
-        install = "    <pre><code>/plugin marketplace add " + owner + "/research-kit</code></pre>"
+        base = "https://github.com/" + owner + "/provenote"
+        install = "    <pre><code>/plugin marketplace add " + owner + "/provenote</code></pre>"
         # accepted forms
         self.site_page_case('<a href="' + base + '">x</a>', 0)
         self.site_page_case('<a href="' + base + '/blob/main/docs/verification.md">x</a>', 0)
@@ -346,7 +346,7 @@ class LeakCheck(unittest.TestCase):
         self.site_page_case(install + '<a href="https://github.com/' + owner + '/privatefixtureword">x</a>', 1)
         self.site_page_case(install + " privatefixtureword", 1)
         self.site_page_case(
-            "    <pre><code>/plugin marketplace add privatefixtureword/research-kit</code></pre>", 1
+            "    <pre><code>/plugin marketplace add privatefixtureword/provenote</code></pre>", 1
         )
         for tail in (
             "/blob/main/../../privatefixtureword",
@@ -368,6 +368,23 @@ class LeakCheck(unittest.TestCase):
             with self.subTest(name=name):
                 self.check_reference(name, '<a href="' + base + '">x</a>', 1, kind="denylist")
 
+    def test_site_pages_url_allowance_is_anchored(self):
+        owner = PUBLIC_HANDLE
+        pages = "https://" + owner + ".github.io/provenote/"
+        self.site_page_case('<link rel="canonical" href="' + pages + '">', 0)
+        self.site_page_case('<meta property="og:image" content="' + pages + 'social-preview.png">', 0)
+        self.check_reference("README.md", pages, 1, kind="denylist")
+        for bad in (
+            "see " + pages,
+            "https://" + owner + ".github.io/other/",
+            pages + "privatefixtureword.png",
+            "https://" + owner + ".github.io.evil.com/provenote/",
+            "https://x" + owner + ".github.io/provenote/",
+        ):
+            with self.subTest(bad=bad):
+                self.site_page_case('<a href="' + bad + '">x</a>' if "see" not in bad else bad, 1)
+        self.site_page_case('<a href="' + pages + '">' + owner + "</a>", 1)
+
     def test_public_urls_unexpected_files_are_denied(self):
         for name in ("other.md", "nested/README.md", "docs/other.md"):
             for url in PUBLIC_URLS:
@@ -385,7 +402,7 @@ class LeakCheck(unittest.TestCase):
                     self.check_reference("INSTALL.md", url + " " + value, 1, kind=kind)
 
     def test_install_exact_marketplace_command(self):
-        command = "/plugin marketplace add " + PUBLIC_HANDLE + "/research-kit"
+        command = "/plugin marketplace add " + PUBLIC_HANDLE + "/provenote"
         self.check_reference("INSTALL.md", command, 0)
         self.check_reference(
             "INSTALL.md", command + " privatefixtureword", 1, kind="denylist"

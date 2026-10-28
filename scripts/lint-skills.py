@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 """Lint plugin skills: every SKILL.md needs front matter with `name` (= folder name) and a
-non-empty `description`, and every plugins/research-kit/ path it mentions must exist.
+non-empty `description`, and every plugins/provenote/ path it mentions must exist.
 Stdlib only. Usage: python3 scripts/lint-skills.py [repo-root]"""
 import re
 import sys
 from pathlib import Path
 
 root = Path(sys.argv[1] if len(sys.argv) > 1 else Path(__file__).resolve().parent.parent)
-skills = sorted((root / "plugins/research-kit/skills").glob("*/SKILL.md"))
+skills = sorted((root / "plugins/provenote/skills").glob("*/SKILL.md"))
 FM = re.compile(r"\A---[ \t]*\r?\n(.*?)\r?\n---[ \t]*(?:\r?\n|\Z)", re.S)
-PATH = re.compile(r"plugins/research-kit/[\w./-]*[\w/-]")
+PATH = re.compile(r"plugins/provenote/[\w./-]*[\w/-]")
 errors = []
 if not skills:
-    errors.append("no skills found under plugins/research-kit/skills/")
+    errors.append("no skills found under plugins/provenote/skills/")
 for f in skills:
     rel = f.relative_to(root).as_posix()
     text = f.read_text(encoding="utf-8")

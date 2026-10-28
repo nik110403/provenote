@@ -15,7 +15,7 @@ into the paper.
 
 ```sh
 pandoc -o reference.docx --print-default-data-file reference.docx
-python3 "/absolute/path/to/plugins/research-kit/bin/build-paper" --to docx --reference-doc reference.docx
+python3 "/absolute/path/to/plugins/provenote/bin/build-paper" --to docx --reference-doc reference.docx
 ```
 
 On Windows PowerShell, create the file with `-o` rather than redirecting binary
@@ -24,7 +24,7 @@ machine.
 
 ```powershell
 pandoc -o reference.docx --print-default-data-file reference.docx
-& py -3 "C:\absolute\path\to\plugins\research-kit\bin\build-paper" --to docx --reference-doc reference.docx
+& py -3 "C:\absolute\path\to\plugins\provenote\bin\build-paper" --to docx --reference-doc reference.docx
 ```
 
 `--reference-doc` accepts a file path relative to the directory where you invoke

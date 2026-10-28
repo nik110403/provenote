@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 import shutil
 
-BIN = Path(__file__).resolve().parent.parent / "plugins/research-kit/bin"
+BIN = Path(__file__).resolve().parent.parent / "plugins/provenote/bin"
 
 
 class Standalone(unittest.TestCase):

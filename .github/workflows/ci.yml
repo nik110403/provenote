@@ -53,7 +53,7 @@ jobs:
         shell: bash
         run: |
           if command -v claude >/dev/null 2>&1; then
-            claude plugin validate --strict plugins/research-kit
+            claude plugin validate --strict plugins/provenote
           else
             python scripts/lint-skills.py
           fi
