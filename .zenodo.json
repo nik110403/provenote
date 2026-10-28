@@ -1,0 +1,8 @@
+{
+  "title": "Provenote",
+  "description": "A Claude Code plugin that turns a reading list into source-grounded notes, checks a draft against them, and builds a paper.",
+  "upload_type": "software",
+  "license": "MIT",
+  "creators": [{ "name": "Khosravipour, Nik" }],
+  "keywords": ["claude-code-plugin", "literature-review", "citations", "academic-writing", "research"]
+}

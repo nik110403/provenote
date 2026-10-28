@@ -1,12 +1,12 @@
 {
   "name": "provenote",
   "owner": { "name": "Nik Khosravipour", "url": "https://github.com/nik110403" },
-  "metadata": { "description": "Skills, agents and tools for source-grounded research projects." },
+  "metadata": { "description": "Turn a reading list into source-grounded notes, check a draft against them, and build a paper." },
   "plugins": [
     {
       "name": "provenote",
       "source": "./plugins/provenote",
-      "description": "Skills, agents and tools for source-grounded research projects."
+      "description": "Turn a reading list into source-grounded notes, check a draft against them, and build a paper."
     }
   ]
 }

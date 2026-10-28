@@ -1,7 +1,7 @@
 {
   "name": "provenote",
   "version": "0.2.0",
-  "description": "Skills, agents and tools for source-grounded research projects: PDF to markdown, literature notes, quote verification.",
+  "description": "Turn a reading list into source-grounded notes, check a draft against them, and build a paper.",
   "author": { "name": "Nik Khosravipour", "url": "https://github.com/nik110403" },
   "license": "MIT"
 }

@@ -59,6 +59,7 @@ scan() {
       deny = ENVIRON["LEAK_CHECK_DENYLIST"]
       home = "/ho" "me/"; users = "/Us" "ers/"
       public_owner = "nik" "110403"
+      author_family = "Khosravi" "pour"
       public_url = "https://github\\.com/" public_owner "/(provenote|ai-architecture)(/actions/workflows/ci\\.yml(/badge\\.svg)?)?"
       site_url = "https://github\\.com/" public_owner "/provenote"
       pages_url = "https://" public_owner "\\.github\\.io/provenote/"
@@ -130,6 +131,9 @@ scan() {
       low = tolower(line)
       # the author identity may be named only on its copyright/metadata lines
       if ($1 ~ /(^|:)(LICENSE|\.claude-plugin\/marketplace\.json|plugins\/provenote\/\.claude-plugin\/plugin\.json):[0-9]+$/ && line ~ /^Copyright \(c\) |"(name|owner|author)": *[{"]/) next
+      # Citation metadata names the author and the public URLs only on these exact lines.
+      if ($1 ~ /^([0-9a-f]+:)?CITATION\.cff:[0-9]+$/ && (line == "  - family-names: \"" author_family "\"" || line == "repository-code: \"https://github.com/" public_owner "/provenote\"" || line == "url: \"https://" public_owner ".github.io/provenote/\"")) next
+      if ($1 ~ /^([0-9a-f]+:)?\.zenodo\.json:[0-9]+$/ && line == "  \"creators\": [{ \"name\": \"" author_family ", Nik\" }],") next
       # The vendored banner tool carries the site name as its --footer default; allowed on that exact line only.
       if ($1 ~ /(^|:)tools\/banner\/bin\/make-banner:[0-9]+$/ && line ~ /^    p\.add_argument\("--footer", default="[a-z.]+"\)$/) next
       if ($1 ~ /(^|:)README\.md:[0-9]+$/ && line ~ /^\/plugin marketplace add [A-Za-z0-9-]+\/provenote$/) next
@@ -138,9 +142,9 @@ scan() {
       if ($1 ~ /^([0-9a-f]+:)?site\/index\.html:[0-9]+$/ && line == "    <pre><code>/plugin marketplace add " public_owner "/provenote</code></pre>") next
       # Only exact public tokens in these root-relative docs leave the comparison.
       # All other text, including other deny terms on the same line, stays checked.
-      if ($1 ~ /^([0-9a-f]+:)?(README\.md|INSTALL\.md|CATALOG\.md|CONTRIBUTING\.md|CHANGELOG\.md|docs\/(adapters|workflow|getting-started)\.md):[0-9]+$/) {
+      if ($1 ~ /^([0-9a-f]+:)?(README\.md|INSTALL\.md|CATALOG\.md|CONTRIBUTING\.md|CHANGELOG\.md|plugins\/provenote\/README\.md|docs\/(adapters|workflow|getting-started)\.md):[0-9]+$/) {
         comparison = public_references(line)
-        if ($1 ~ /^([0-9a-f]+:)?(INSTALL|CHANGELOG|docs\/getting-started)\.md:[0-9]+$/ &&
+        if ($1 ~ /^([0-9a-f]+:)?(INSTALL|CHANGELOG|plugins\/provenote\/README|docs\/getting-started)\.md:[0-9]+$/ &&
             line == "/plugin marketplace add " public_owner "/provenote") comparison = ""
         low = tolower(comparison)
       }

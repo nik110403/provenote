@@ -12,6 +12,7 @@ HOME_PATH = "/ho" + "me/x/notes"  # built in pieces so this file is itself clean
 IP = "10.1." + "2.3"
 EMAIL = "jane@" + "example.org"
 PUBLIC_HANDLE = "nik" + "110403"
+AUTHOR_FAMILY = "Khosravi" + "pour"
 PUBLIC_URLS = tuple(
     "https://github.com/" + PUBLIC_HANDLE + "/" + repo
     for repo in ("provenote", "ai-architecture")
@@ -199,6 +200,49 @@ class LeakCheck(unittest.TestCase):
             check("README.md", "/plugin marketplace add SecretProject/provenote"), 0
         )
         self.assertEqual(check("README.md", "see SecretProject/provenote"), 1)
+
+    def test_citation_metadata_allowed_on_exact_lines_only(self):
+        self.deny.write_text(
+            "secretproject\n" + PUBLIC_HANDLE + "\n" + AUTHOR_FAMILY.lower() + "\n",
+            encoding="utf-8",
+        )
+        env = dict(os.environ, PROVENOTE_DENYLIST=str(self.deny))
+        family = '  - family-names: "' + AUTHOR_FAMILY + '"'
+        creators = '  "creators": [{ "name": "' + AUTHOR_FAMILY + ', Nik" }],'
+        repo_line = 'repository-code: "https://github.com/' + PUBLIC_HANDLE + '/provenote"'
+        url_line = 'url: "https://' + PUBLIC_HANDLE + '.github.io/provenote/"'
+        for name, text, want in (
+            ("CITATION.cff", family, 0),
+            ("CITATION.cff", family + " # x", 1),
+            ("CITATION.cff", '  - family-names: "Secretproject"', 1),
+            ("CITATION.cff", 'title: "' + AUTHOR_FAMILY + '"', 1),
+            ("CITATION.cff", repo_line, 0),
+            ("CITATION.cff", url_line, 0),
+            ("CITATION.cff", repo_line.replace("provenote", "secretproject"), 1),
+            (".zenodo.json", creators, 0),
+            (".zenodo.json", '  "creators": [{ "name": "Secretproject, Nik" }],', 1),
+            (".zenodo.json", creators.replace("Nik", "Secretproject"), 1),
+            ("README.md", family, 1),
+            (
+                "plugins/provenote/README.md",
+                "https://github.com/" + PUBLIC_HANDLE + "/provenote secretproject",
+                1,
+            ),
+        ):
+            (self.repo / name).parent.mkdir(parents=True, exist_ok=True)
+            (self.repo / name).write_text(text + "\n", encoding="utf-8")
+            self.git("add", name)
+            r = subprocess.run(
+                [BASH, str(SCRIPT)],
+                cwd=self.repo,
+                env=env,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+            )
+            self.git("rm", "-q", "--cached", name)
+            self.assertEqual(r.returncode, want, (name, text, r.stderr))
 
     def test_banner_footer_default_allowed_on_exact_line_only(self):
         line = '    p.add_argument("--footer", default="secretproject.com")'
