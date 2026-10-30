@@ -13,7 +13,7 @@ below are workflow artifacts; the main session saves model-returned text.
 | Skill | Inputs → outputs | Dependencies and selective use |
 |---|---|---|
 | [new-research-project](plugins/provenote/skills/new-research-project/SKILL.md) | Target directory and question → numbered project tree and filled project kernel | Python 3.9+, `new-project`, `templates/project/`; use for a new, empty target |
-| [literature-search](plugins/provenote/skills/literature-search/SKILL.md) | Research brief and queries → search CSV, Markdown, receipt; optional BibTeX | `lit-search`, Python, internet; optional Semantic Scholar key and `LIT_SEARCH_MAILTO`; use independently of PDF/note stages |
+| [literature-search](plugins/provenote/skills/literature-search/SKILL.md) | Research brief and queries → search CSV, Markdown, receipt; optional BibTeX | `lit-search`, Python, internet; optional `mailto` plugin setting; use independently of PDF/note stages |
 | [pdf-to-markdown](plugins/provenote/skills/pdf-to-markdown/SKILL.md) | PDFs → source Markdown and manifest | `pdf2md`, Python, `pdftotext`; optional OCR/decryption; use for local sources |
 | [literature-notes](plugins/provenote/skills/literature-notes/SKILL.md) | Source Markdown, citekey, reading scope → `01_notes/lit/<citekey>.md`, quote-check results | Full folder including [template.md](plugins/provenote/skills/literature-notes/template.md), `source-reader`, `verify-quotes`; use on already-converted sources |
 | [review-against-notes](plugins/provenote/skills/review-against-notes/SKILL.md) | Draft and literature notes → dated review report | `verify-quotes`, `check-claims`, `claim-checker`, `skeptic`; `check-bib` is a useful separate check, not included in this skill's sequence |
@@ -43,7 +43,7 @@ from the working directory indicated in [INSTALL.md](INSTALL.md).
 | Tool | Inputs → outputs | Dependencies and selective use |
 |---|---|---|
 | [new-project](plugins/provenote/bin/new-project) | Empty target directory → copied research project | Python; `templates/project/` sibling to `bin/`; refuses nonempty targets |
-| [lit-search](plugins/provenote/bin/lit-search) | Query/options or DOI export → ranked CSV, Markdown, receipt, optional `.bib` append | Python, internet to OpenAlex/Semantic Scholar/doi.org; optional API key; inspect provider status, never call a partial run complete |
+| [lit-search](plugins/provenote/bin/lit-search) | Query/options or DOI export → ranked CSV, Markdown, receipt, optional `.bib` append | Python, internet to OpenAlex/Semantic Scholar/doi.org; inspect provider status, never call a partial run complete |
 | [pdf2md](plugins/provenote/bin/pdf2md) | PDF paths/options → `<stem>.md`, manifest | Python, `pdftotext`; optional `ocrmypdf`, `qpdf`; `--engine docling` is refused (removed in 0.1.3: one page-1 block breaks page pinning); existing conversions need `--force` to overwrite |
 | [verify-quotes](plugins/provenote/bin/verify-quotes) | Notes naming source Markdown, pages and text → per-quote PASS/FAIL, nonzero on failure | Python; offline; checks text against page markers with whitespace/hyphenation normalization |
 | [check-claims](plugins/provenote/bin/check-claims) | Pandoc-cited draft and note directory → citation-to-note table | Python; offline; needs `verify-quotes` in the same folder; verifies quotes of each cited note, does not judge entailment |

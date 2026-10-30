@@ -169,9 +169,11 @@ not a replacement for instructions in an existing one.
 Python 3.9+ covers the eleven helpers. `pdf2md` additionally needs `pdftotext`
 from Poppler; optional `ocrmypdf` handles scans and `qpdf` encrypted PDFs. Docling was removed in 0.1.3: `pdf2md --engine docling` is refused
 because its output is one block marked page 1, which breaks page pinning. Search uses OpenAlex, Semantic Scholar and doi.org.
-Set an optional `SEMANTIC_SCHOLAR_API_KEY` in the process environment, never
-in tracked files; without a key Semantic Scholar often returns 429/403.
-Inspect receipts for partial provider coverage. `LIT_SEARCH_MAILTO` is optional.
+`lit-search` reads no API keys or contact details from the environment (urllib's standard proxy
+variables still apply), so Semantic Scholar is queried anonymously and often returns 429/403; inspect receipts for partial provider coverage.
+An optional contact email for OpenAlex is the plugin setting `mailto` (`/plugin configure
+provenote@provenote` in Claude Code), which the skill passes as `--mailto`; elsewhere, pass
+`--mailto <your-address>` yourself.
 
 Model steps (the skills and roles) depend on your assistant's access and may incur
 its usual costs. CI covers the helpers on Linux, macOS and Windows, not a live Codex

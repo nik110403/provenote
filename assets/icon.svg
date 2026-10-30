@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-label="Provenote">
+<title>Provenote</title>
+<!-- Provenote directory icon. Source of truth; render with tools/icon/render.sh -> plugins/provenote/.claude-plugin/icon.png -->
+<!-- Brand: accent #8c2f1b field, paper #faf7f2 mark (colours from site/index.html and the banners). Mark: the closing double quote (U+201D) from the Fraunces cut used in the wordmark, outlined to a path (no live text, no font dependency) = verified quote. -->
+<rect width="1024" height="1024" fill="#8c2f1b"/>
+<path fill="#faf7f2" transform="translate(165.75 1522.63) scale(0.82147 -0.82147)" d="M614 1240Q535 1240 495.0 1277.5Q455 1315 455 1378Q455 1443 500.5 1484.5Q546 1526 612 1526Q685 1526 734.0 1473.5Q783 1421 783 1315Q783 1160 707.0 1062.5Q631 965 516 938Q478 929 472 953Q467 977 504 991Q600 1021 644.0 1086.0Q688 1151 688 1204Q688 1240 648 1240ZM219 1239Q140 1239 100.0 1276.5Q60 1314 60 1377Q60 1443 106.0 1484.5Q152 1526 218 1526Q290 1526 339.0 1473.0Q388 1420 388 1314Q388 1160 312.0 1062.0Q236 964 122 937Q83 928 77 952Q72 976 110 990Q205 1021 249.5 1085.5Q294 1150 294 1204Q294 1239 253 1239Z"/>
+</svg>

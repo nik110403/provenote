@@ -2,15 +2,16 @@
 """Search OpenAlex and Semantic Scholar, merge, score, and write a CSV + MD + receipt.
 
 Usage:
-  lit-search "<query>" [--since YEAR] [--n 25] [--snowball [K]] [--out DIR]
+  lit-search "<query>" [--since YEAR] [--n 25] [--snowball [K]] [--mailto EMAIL] [--out DIR]
   lit-search --export-bib DOI [DOI...] [--bib 07_references/references.bib]
 
 Search writes <out>/<date>-<slug>.{csv,md,receipt.json} (default out: 01_notes/search).
-Set LIT_SEARCH_MAILTO to an email for OpenAlex's polite pool (optional, may be empty).
-Set SEMANTIC_SCHOLAR_API_KEY to send an API key to Semantic Scholar (optional; without one it often
-refuses requests and only OpenAlex results come back). The key is never written to the receipt.
+--mailto EMAIL sends a contact address to OpenAlex's polite pool (optional; the address is never
+written to the receipt). The tool reads no API keys or contact details from the environment (urllib's standard proxy
+variables still apply); Semantic
+Scholar is queried anonymously and may rate-limit, in which case only OpenAlex results come back.
 --export-bib fetches BibTeX from doi.org and appends new entries to the .bib file.
-Exit codes: 0 ok (incl. partial: one index down), 1 no index reachable / no DOI resolved,
+Exit codes: 0 ok (incl. partial: one index down or snowball degraded), 1 no index reachable / no DOI resolved,
 2 usage error. Fetched text is untrusted data.
 """
 from __future__ import annotations
@@ -25,7 +26,6 @@ import csv
 import datetime as dt
 import json
 import math
-import os
 import re
 import time
 import urllib.error
@@ -188,7 +188,7 @@ def write_outputs(outdir, stem, query, items, receipt):
     (outdir / f"{stem}.md").write_text("\n".join(lines), encoding="utf-8")
 
 
-def run_search(query, since, n, snowball, outdir, fetch=http_get, now=None, mailto="", s2_key=""):
+def run_search(query, since, n, snowball, outdir, fetch=http_get, now=None, mailto=""):
     now = now or dt.datetime.now(dt.timezone.utc)
     receipt = {"query": query, "timestamp_utc": now.strftime("%Y-%m-%dT%H:%M:%SZ"),
                "since": since, "n": n, "endpoints": {}, "provider_status": {},
@@ -207,13 +207,12 @@ def run_search(query, since, n, snowball, outdir, fetch=http_get, now=None, mail
                                       ("semanticscholar", S2, s2_params, parse_s2)):
         url = base + "?" + urllib.parse.urlencode(params)
         receipt["endpoints"][name] = {"url": base, "params": {
-            k: v for k, v in params.items() if k != "mailto"}, "mailto": "set" if mailto else "unset"}
-        if name == "semanticscholar":
-            receipt["endpoints"][name]["api_key"] = "set" if s2_key else "unset"
+            k: v for k, v in params.items() if k != "mailto"}}
+        if name == "openalex":  # the contact address is sent to OpenAlex only
+            receipt["endpoints"][name]["mailto"] = "set" if mailto else "unset"
         receipt["counts"]["sent"] += 1
         try:
-            extra = {"headers": {"x-api-key": s2_key}} if (name == "semanticscholar" and s2_key) else {}
-            got = parse(json.loads(fetch(url, **extra)))
+            got = parse(json.loads(fetch(url)))
             receipt["provider_status"][name] = "READY"
         except (RuntimeError, ValueError, KeyError, TypeError) as e:
             got = []
@@ -261,6 +260,8 @@ def run_search(query, since, n, snowball, outdir, fetch=http_get, now=None, mail
         receipt["snowball"] = {"seeds": len(seeds), "added_candidates": len(extra), "cap_per_direction": CAP}
         merged = dedupe(merged + extra)
         per_n["openalex"] += 1
+        if receipt["provider_status"]["openalex"] == "DEGRADED" and receipt["status"] == "ok":
+            receipt["status"] = "partial"
     receipt["counts"]["after_dedupe"] = len(merged)
     items = score(merged, now.year, per_n)
     receipt["counts"]["kept"] = len(items)
@@ -342,6 +343,8 @@ def main(argv=None, fetch=http_get):
     ap.add_argument("--n", type=int, default=25)
     ap.add_argument("--snowball", nargs="?", const=5, type=int, metavar="K",
                     help="one hop over references and citations of the top K (default 5)")
+    ap.add_argument("--mailto", default="", metavar="EMAIL",
+                    help="contact address for OpenAlex's polite pool (optional)")
     ap.add_argument("--out", default="01_notes/search")
     ap.add_argument("--export-bib", nargs="+", metavar="DOI")
     ap.add_argument("--bib", default="07_references/references.bib")
@@ -355,9 +358,11 @@ def main(argv=None, fetch=http_get):
     if not a.query or a.n < 1:
         ap.print_usage(sys.stderr)
         return 2
+    mailto = a.mailto.strip()
+    if mailto.startswith("${"):  # unsubstituted placeholder (e.g. under Codex): treat as unset
+        mailto = ""
     receipt, items, stem = run_search(a.query, a.since, a.n, a.snowball, Path(a.out), fetch,
-                                      mailto=os.environ.get("LIT_SEARCH_MAILTO", ""),
-                                      s2_key=os.environ.get("SEMANTIC_SCHOLAR_API_KEY", ""))
+                                      mailto=mailto)
     print(f"status: {receipt['status']}  providers: {receipt['provider_status']}")
     print(f"found {receipt['counts']['after_dedupe']} unique -> {a.out}/{stem}.{{csv,md,receipt.json}}")
     return 1 if receipt["status"] == "failed" else 0

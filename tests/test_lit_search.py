@@ -1,12 +1,15 @@
+import ast
 import csv
 import datetime as dt
 import importlib.machinery
 import importlib.util
 import json
+import os
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parent.parent
 TOOL = ROOT / "plugins/provenote/bin/lit-search"
@@ -184,6 +187,18 @@ class Http(unittest.TestCase):
             r, _, _ = ls.run_search("q", None, 25, 3, Path(t), f, NOW)
         self.assertEqual(len(n), 3)
         self.assertEqual(r["provider_status"]["openalex"], "DEGRADED")
+        self.assertEqual(r["status"], "partial")
+
+    def test_degraded_snowball_is_partial_with_exit_code_zero(self):
+        def f(url, accept="application/json", **kw):
+            if "filter=" in url:
+                raise RuntimeError("HTTP 503")
+            return ROUTES["api.openalex.org" if "openalex" in url else "api.semanticscholar.org"]
+        with tempfile.TemporaryDirectory() as t:
+            rc = ls.main(["q", "--snowball", "3", "--out", t], f)
+            self.assertEqual(rc, 0)
+            rec = next(Path(t).glob("*.receipt.json"))
+            self.assertEqual(json.loads(rec.read_text(encoding="utf-8"))["status"], "partial")
 
 
 class Privacy(unittest.TestCase):
@@ -191,27 +206,81 @@ class Privacy(unittest.TestCase):
         with tempfile.TemporaryDirectory() as t:
             r, _, stem = ls.run_search("q", None, 25, None, Path(t), fake_fetch(ROUTES), NOW, "secret-addr")
             self.assertEqual(r["endpoints"]["openalex"]["mailto"], "set")
+            self.assertNotIn("mailto", r["endpoints"]["semanticscholar"])
             for f in Path(t).iterdir():
                 self.assertNotIn("secret-addr", f.read_text(encoding="utf-8"))
 
 
-class ApiKey(unittest.TestCase):
-    def test_header_sent_to_s2_only_and_key_not_recorded(self):
-        fetch = fake_fetch(ROUTES)
-        with tempfile.TemporaryDirectory() as t:
-            r, _, _ = ls.run_search("q", None, 25, None, Path(t), fetch, NOW, "", "s3cr3t-key")
-            self.assertEqual(r["endpoints"]["semanticscholar"]["api_key"], "set")
-            for f in Path(t).iterdir():
-                self.assertNotIn("s3cr3t-key", f.read_text(encoding="utf-8"))
-        self.assertEqual(list(fetch.headers.values()), [{"x-api-key": "s3cr3t-key"}])
-        self.assertIn("api.semanticscholar.org", list(fetch.headers)[0])
-
-    def test_no_header_without_key(self):
+class ExplicitConfigOnly(unittest.TestCase):
+    def test_no_headers_sent_and_no_key_in_receipt(self):
         fetch = fake_fetch(ROUTES)
         with tempfile.TemporaryDirectory() as t:
             r, _, _ = ls.run_search("q", None, 25, None, Path(t), fetch, NOW)
         self.assertEqual(fetch.headers, {})
-        self.assertEqual(r["endpoints"]["semanticscholar"]["api_key"], "unset")
+        self.assertNotIn("api_key", r["endpoints"]["semanticscholar"])
+
+    def test_tool_source_never_touches_environment(self):
+        tree = ast.parse(TOOL.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                self.assertNotIn("os", [a.name.split(".")[0] for a in node.names])
+            if isinstance(node, ast.ImportFrom):
+                self.assertNotEqual((node.module or "").split(".")[0], "os")
+                self.assertNotIn("environ", [a.name for a in node.names])
+                self.assertNotIn("getenv", [a.name for a in node.names])
+            if isinstance(node, ast.Name):
+                self.assertNotIn(node.id, ("os", "environ", "getenv"))
+            if isinstance(node, ast.Attribute):
+                self.assertNotIn(node.attr, ("environ", "getenv"))
+
+    def test_environment_values_are_never_sent(self):
+        seen = []
+        base = fake_fetch(ROUTES)
+
+        def fetch(url, accept="application/json", **kw):
+            seen.append((url, kw))
+            return base(url, accept, **kw)
+        env = {"SEMANTIC_SCHOLAR_API_KEY": "env-secret-key", "LIT_SEARCH_MAILTO": "env-secret@users.noreply.github.com"}
+        with mock.patch.dict(os.environ, env), tempfile.TemporaryDirectory() as t:
+            self.assertEqual(ls.main(["q", "--snowball", "2", "--out", t], fetch), 0)
+            for f in Path(t).iterdir():
+                text = f.read_text(encoding="utf-8")
+                self.assertNotIn("env-secret", text)
+        self.assertTrue(seen)
+        for url, kw in seen:
+            self.assertNotIn("env-secret", url)
+            self.assertNotIn("env-secret", repr(kw))
+            self.assertFalse(kw.get("headers"))
+
+    def test_unsubstituted_placeholder_is_treated_as_unset(self):
+        seen = []
+        base = fake_fetch(ROUTES)
+
+        def fetch(url, accept="application/json", **kw):
+            seen.append(url)
+            return base(url, accept, **kw)
+        with tempfile.TemporaryDirectory() as t:
+            self.assertEqual(ls.main(["q", "--mailto", "${user_config.mailto}", "--out", t], fetch), 0)
+            rec = json.loads(next(Path(t).glob("*.receipt.json")).read_text(encoding="utf-8"))
+        self.assertEqual(rec["endpoints"]["openalex"]["mailto"], "unset")
+        self.assertFalse(any("mailto" in u or "user_config" in u for u in seen))
+
+    def test_mailto_flag_reaches_openalex_only(self):
+        seen = []
+        base = fake_fetch(ROUTES)
+
+        def fetch(url, accept="application/json", **kw):
+            seen.append(url)
+            return base(url, accept, **kw)
+        with tempfile.TemporaryDirectory() as t:
+            rc = ls.main(["q", "--mailto", "polite-contact", "--out", t], fetch)
+            self.assertEqual(rc, 0)
+            for f in Path(t).iterdir():
+                self.assertNotIn("polite-contact", f.read_text(encoding="utf-8"))
+        oa = [u for u in seen if "openalex" in u]
+        s2 = [u for u in seen if "semanticscholar" in u]
+        self.assertTrue(oa and all("mailto=polite-contact" in u for u in oa))
+        self.assertTrue(s2 and not any("mailto" in u for u in s2))
 
 
 class BibExport(unittest.TestCase):

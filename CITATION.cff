@@ -1,13 +1,13 @@
 cff-version: 1.2.0
-message: "If you use Provenote in your research, please cite it as below."
+message: "If you use Provenote in your research, please cite it as below. The license field covers the code; see LICENSING.md for documentation, examples and fonts."
 type: software
 title: "Provenote"
 abstract: "A Claude Code plugin that turns a reading list into source-grounded notes, checks a draft against them, and builds a paper."
 authors:
   - family-names: "Khosravipour"
     given-names: "Nik"
-version: "0.2.0"
-date-released: "2026-10-28"
+version: "0.2.1"
+date-released: "2026-10-30"
 license: MIT
 repository-code: "https://github.com/nik110403/provenote"
 url: "https://nik110403.github.io/provenote/"

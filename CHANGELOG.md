@@ -1,5 +1,32 @@
 # Changelog
 
+## 0.2.1
+
+### Added
+
+- Plugin icon (`.claude-plugin/icon.png`, source `assets/icon.svg`, rebuilt by `tools/icon/render.sh`)
+  for the Claude plugin directory listing.
+
+### Breaking changes (upgrading from 0.2.0)
+
+`lit-search` reads no API keys or contact details from the environment. The plugin directory
+flags reading a credential from the user's machine.
+
+- `SEMANTIC_SCHOLAR_API_KEY` is no longer read and Semantic Scholar API-key support is removed.
+  Semantic Scholar is queried anonymously and may rate-limit; receipts show partial coverage.
+- `LIT_SEARCH_MAILTO` is no longer read. The contact email is now the plugin setting `mailto`
+  (`userConfig` in `plugin.json`), passed by the skill as `--mailto`; the CLI also accepts
+  `--mailto EMAIL` directly. Set it with `/plugin configure provenote@provenote`.
+
+### Fixed
+
+- The receipt records `mailto` only for OpenAlex, the one index that receives it; the Semantic
+  Scholar entry no longer carries it.
+- When snowballing leaves OpenAlex DEGRADED, the receipt `status` is now `partial` instead of
+  `ok`. The exit code is unchanged.
+- A `--mailto` value that is still an unsubstituted placeholder (starting with `${`) is treated as
+  unset: it is not sent and the receipt says `unset`.
+
 ## 0.2.0
 
 ### Renamed

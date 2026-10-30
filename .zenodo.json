@@ -3,6 +3,7 @@
   "description": "A Claude Code plugin that turns a reading list into source-grounded notes, checks a draft against them, and builds a paper.",
   "upload_type": "software",
   "license": "MIT",
+  "notes": "Code is MIT. Documentation and most examples are CC BY 4.0; third-party papers in examples remain CC BY 4.0 by their authors; banner fonts are OFL 1.1. See LICENSING.md.",
   "creators": [{ "name": "Khosravipour, Nik" }],
   "keywords": ["claude-code-plugin", "literature-review", "citations", "academic-writing", "research"]
 }

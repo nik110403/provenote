@@ -2,7 +2,7 @@
 
 # Provenote
 
-[![CI](https://github.com/nik110403/provenote/actions/workflows/ci.yml/badge.svg)](https://github.com/nik110403/provenote/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-8c2f1b?style=flat)](LICENSE) [![Plugin version](https://img.shields.io/badge/plugin-0.2.0-57534e?style=flat)](CHANGELOG.md)
+[![CI](https://github.com/nik110403/provenote/actions/workflows/ci.yml/badge.svg)](https://github.com/nik110403/provenote/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-8c2f1b?style=flat)](LICENSE) [![Plugin version](https://img.shields.io/badge/plugin-0.2.1-57534e?style=flat)](CHANGELOG.md)
 
 **Turn a reading list into source-grounded notes, check a draft against them, and build a paper.**
 
@@ -11,7 +11,7 @@
 - A paper built as PDF, HTML or DOCX, after a bibliography check.
 
 No API key, no server: it runs inside the assistant you already use (Claude Code, or
-Codex through an adapter). Early-stage, version 0.2.0.
+Codex through an adapter). Early-stage, version 0.2.1.
 
 <sub>Formerly research-kit. Upgrading? Remove the old plugin first; see [INSTALL.md](INSTALL.md#upgrading-from-research-kit).</sub>
 
@@ -118,7 +118,7 @@ flowchart LR
 ## Configuration
 
 Python 3.9+ (standard library only) runs the helpers; PDF conversion needs `pdftotext`,
-paper builds need pandoc, and an optional `SEMANTIC_SCHOLAR_API_KEY` helps search. Dependencies,
+paper builds need pandoc, and an optional `mailto` setting gives search a contact address. Dependencies,
 Windows invocation and limits: [INSTALL.md](INSTALL.md#platform-and-dependency-checklist).
 
 ## Contributing

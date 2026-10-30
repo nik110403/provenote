@@ -6,7 +6,7 @@ It uses neither Zotero nor prewritten Provenote notes.
 
 ## Install
 
-Install the released version (0.2.0) as described in the
+Install the released version (0.2.1) as described in the
 [README](../README.md#claude-code) or [INSTALL.md](../INSTALL.md).
 
 To reproduce the demonstration below, clone the repository (see the [README](../README.md#30-second-example)) and, with Python 3.9+, run from its root.

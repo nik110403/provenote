@@ -9,7 +9,8 @@ Turn a reading list into source-grounded notes, check a draft against them, and 
 
 No API key and no server: the skills, agents and tools run inside Claude Code. The
 `literature-search` skill sends search queries to Semantic Scholar and OpenAlex and resolves
-DOIs via doi.org; everything else works on local files.
+DOIs via doi.org; everything else works on local files. An optional contact email, if you
+configure one, is sent to OpenAlex only.
 
 ## Install
 
