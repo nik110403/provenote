@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.2.2
+
+### Added
+
+- [Privacy policy](PRIVACY.md), linked from `plugin.json` for the Claude plugin directory
+  listing, with homepage, repository and support links.
+
+### Changed
+
+- The plugin setting `mailto` and the plugin README now say that the address also appears in your
+  session transcript and reaches your model provider. The plugin README lists what the `bin/` tools
+  are and run.
+- The plugin README states the network exceptions: `pandoc` fetching linked images, bibliographies
+  and citation styles, and pipelines running your own code.
+- The `literature-search` skill passes `mailto` in single quotes and leaves it out if it holds
+  anything but letters, digits and `@._+-`. This reduces shell-quoting risk but relies on the
+  assistant following the instruction; an apostrophe in the address would still break the quoting
+  if the instruction is ignored.
+
 ## 0.2.1
 
 ### Added

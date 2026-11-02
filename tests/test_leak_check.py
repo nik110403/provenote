@@ -228,6 +228,86 @@ class LeakCheck(unittest.TestCase):
                 "https://github.com/" + PUBLIC_HANDLE + "/provenote secretproject",
                 1,
             ),
+            (
+                "plugins/provenote/.claude-plugin/plugin.json",
+                '  "supportUrl": "https://github.com/' + PUBLIC_HANDLE + '/provenote/issues",',
+                0,
+            ),
+            (
+                "plugins/provenote/.claude-plugin/plugin.json",
+                '  "supportUrl": "https://github.com/' + PUBLIC_HANDLE + '/provenote/issues", secretproject',
+                1,
+            ),
+            (
+                "plugins/provenote/.claude-plugin/plugin.json",
+                '  "homepage": "https://' + PUBLIC_HANDLE + '.github.io/provenote/",',
+                0,
+            ),
+            (
+                "plugins/provenote/.claude-plugin/plugin.json",
+                '  "homepage": "https://' + PUBLIC_HANDLE + '.github.io/provenote/", secretproject',
+                1,
+            ),
+            (
+                "plugins/provenote/.claude-plugin/plugin.json",
+                '  "repository": "https://github.com/' + PUBLIC_HANDLE + '/provenote",',
+                0,
+            ),
+            (
+                "plugins/provenote/.claude-plugin/plugin.json",
+                '  "repository": "https://github.com/' + PUBLIC_HANDLE + '/provenote", secretproject',
+                1,
+            ),
+            (
+                "plugins/provenote/.claude-plugin/plugin.json",
+                '  "privacyPolicyUrl": "https://github.com/' + PUBLIC_HANDLE + '/provenote/blob/main/PRIVACY.md",',
+                0,
+            ),
+            (
+                "plugins/provenote/.claude-plugin/plugin.json",
+                '  "privacyPolicyUrl": "https://github.com/' + PUBLIC_HANDLE + '/provenote/blob/main/PRIVACY.md", secretproject',
+                1,
+            ),
+            (
+                "plugins/provenote/README.md",
+                "[privacy policy](https://github.com/" + PUBLIC_HANDLE + "/provenote/blob/main/PRIVACY.md).",
+                0,
+            ),
+            (
+                "plugins/provenote/README.md",
+                "[privacy policy](https://github.com/" + PUBLIC_HANDLE + "/provenote/blob/main/PRIVACY.md). secretproject",
+                1,
+            ),
+            (
+                "PRIVACY.md",
+                "Questions: open an [issue](https://github.com/" + PUBLIC_HANDLE
+                + "/provenote/issues). For a privacy or security",
+                0,
+            ),
+            (
+                "PRIVACY.md",
+                "Questions: open an [issue](https://github.com/" + PUBLIC_HANDLE
+                + "/provenote/issues). For a privacy or security secretproject",
+                1,
+            ),
+        ) + (
+            # a crafted colon-prefixed path no longer gets the allowance (POSIX only)
+            ()
+            if os.name == "nt"
+            else (
+                (
+                    "x:PRIVACY.md",
+                    "Questions: open an [issue](https://github.com/" + PUBLIC_HANDLE
+                    + "/provenote/issues). For a privacy or security",
+                    1,
+                ),
+                (
+                    "ab:PRIVACY.md",
+                    "Questions: open an [issue](https://github.com/" + PUBLIC_HANDLE
+                    + "/provenote/issues). For a privacy or security",
+                    1,
+                ),
+            )
         ):
             (self.repo / name).parent.mkdir(parents=True, exist_ok=True)
             (self.repo / name).write_text(text + "\n", encoding="utf-8")
@@ -243,6 +323,42 @@ class LeakCheck(unittest.TestCase):
             )
             self.git("rm", "-q", "--cached", name)
             self.assertEqual(r.returncode, want, (name, text, r.stderr))
+
+    def test_directory_listing_allowances_in_history(self):
+        self.deny.write_text("secretproject\n" + PUBLIC_HANDLE + "\n", encoding="utf-8")
+        env = dict(os.environ, PROVENOTE_DENYLIST=str(self.deny))
+        pj = "plugins/provenote/.claude-plugin/plugin.json"
+        base = "https://github.com/" + PUBLIC_HANDLE + "/provenote"
+        exact = (
+            (pj, '  "homepage": "https://' + PUBLIC_HANDLE + '.github.io/provenote/",'),
+            (pj, '  "repository": "' + base + '",'),
+            (pj, '  "supportUrl": "' + base + '/issues",'),
+            (pj, '  "privacyPolicyUrl": "' + base + '/blob/main/PRIVACY.md",'),
+            ("plugins/provenote/README.md", "[privacy policy](" + base + "/blob/main/PRIVACY.md)."),
+            ("PRIVACY.md", "Questions: open an [issue](" + base + "/issues). For a privacy or security"),
+        )
+        self.git("commit", "-q", "--allow-empty", "-m", "base")
+        for name, line in exact:
+            for suffix, want in (("", 0), (" secretproject", 1)):
+                with self.subTest(name=name, suffix=suffix):
+                    (self.repo / name).parent.mkdir(parents=True, exist_ok=True)
+                    base_commit = subprocess.run(
+                        ["git", "rev-parse", "HEAD"], cwd=self.repo, check=True, capture_output=True, text=True
+                    ).stdout.strip()
+                    (self.repo / name).write_text(line + suffix + "\n", encoding="utf-8")
+                    self.git("add", name)
+                    self.git("commit", "-qm", "fixture")
+                    r = subprocess.run(
+                        [BASH, str(SCRIPT), "--history"],
+                        cwd=self.repo,
+                        env=env,
+                        capture_output=True,
+                        text=True,
+                        encoding="utf-8",
+                        errors="replace",
+                    )
+                    self.assertEqual(r.returncode, want, r.stdout + r.stderr)
+                    self.git("reset", "-q", "--hard", base_commit)
 
     def test_banner_footer_default_allowed_on_exact_line_only(self):
         line = '    p.add_argument("--footer", default="secretproject.com")'

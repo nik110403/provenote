@@ -53,7 +53,7 @@ tree_stream() {
 }
 
 scan() {
-	LEAK_CHECK_DENYLIST="$denylist" awk -F'\t' '
+	LEAK_CHECK_DENYLIST="$denylist" awk -v mode="$mode" -F'\t' '
     BEGIN {
       # Environment values are literal; awk -v interprets path backslashes.
       deny = ENVIRON["LEAK_CHECK_DENYLIST"]
@@ -129,11 +129,17 @@ scan() {
         hit("email", em)
       }
       low = tolower(line)
+      # exact-line allowances accept a commit prefix in history mode only
+      lab = $1; if (mode == "history") sub(/^[0-9a-f]+:/, "", lab)
       # the author identity may be named only on its copyright/metadata lines
       if ($1 ~ /(^|:)(LICENSE|\.claude-plugin\/marketplace\.json|plugins\/provenote\/\.claude-plugin\/plugin\.json):[0-9]+$/ && line ~ /^Copyright \(c\) |"(name|owner|author)": *[{"]/) next
       # Citation metadata names the author and the public URLs only on these exact lines.
-      if ($1 ~ /^([0-9a-f]+:)?CITATION\.cff:[0-9]+$/ && (line == "  - family-names: \"" author_family "\"" || line == "repository-code: \"https://github.com/" public_owner "/provenote\"" || line == "url: \"https://" public_owner ".github.io/provenote/\"")) next
-      if ($1 ~ /^([0-9a-f]+:)?\.zenodo\.json:[0-9]+$/ && line == "  \"creators\": [{ \"name\": \"" author_family ", Nik\" }],") next
+      if (lab ~ /^CITATION\.cff:[0-9]+$/ && (line == "  - family-names: \"" author_family "\"" || line == "repository-code: \"https://github.com/" public_owner "/provenote\"" || line == "url: \"https://" public_owner ".github.io/provenote/\"")) next
+      # Directory-listing links name the public repo only on these exact lines.
+      if (lab ~ /^plugins\/provenote\/\.claude-plugin\/plugin\.json:[0-9]+$/ && (line == "  \"homepage\": \"https://" public_owner ".github.io/provenote/\"," || line == "  \"repository\": \"https://github.com/" public_owner "/provenote\"," || line == "  \"supportUrl\": \"https://github.com/" public_owner "/provenote/issues\"," || line == "  \"privacyPolicyUrl\": \"https://github.com/" public_owner "/provenote/blob/main/PRIVACY.md\",")) next
+      if (lab ~ /^plugins\/provenote\/README\.md:[0-9]+$/ && line == "[privacy policy](https://github.com/" public_owner "/provenote/blob/main/PRIVACY.md).") next
+      if (lab ~ /^PRIVACY\.md:[0-9]+$/ && line == "Questions: open an [issue](https://github.com/" public_owner "/provenote/issues). For a privacy or security") next
+      if (lab ~ /^\.zenodo\.json:[0-9]+$/ && line == "  \"creators\": [{ \"name\": \"" author_family ", Nik\" }],") next
       # The vendored banner tool carries the site name as its --footer default; allowed on that exact line only.
       if ($1 ~ /(^|:)tools\/banner\/bin\/make-banner:[0-9]+$/ && line ~ /^    p\.add_argument\("--footer", default="[a-z.]+"\)$/) next
       if ($1 ~ /(^|:)README\.md:[0-9]+$/ && line ~ /^\/plugin marketplace add [A-Za-z0-9-]+\/provenote$/) next

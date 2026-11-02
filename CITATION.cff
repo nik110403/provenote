@@ -6,8 +6,8 @@ abstract: "A Claude Code plugin that turns a reading list into source-grounded n
 authors:
   - family-names: "Khosravipour"
     given-names: "Nik"
-version: "0.2.1"
-date-released: "2026-10-30"
+version: "0.2.2"
+date-released: "2026-11-02"
 license: MIT
 repository-code: "https://github.com/nik110403/provenote"
 url: "https://nik110403.github.io/provenote/"

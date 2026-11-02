@@ -2,7 +2,7 @@
 
 # Provenote
 
-[![CI](https://github.com/nik110403/provenote/actions/workflows/ci.yml/badge.svg)](https://github.com/nik110403/provenote/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-8c2f1b?style=flat)](LICENSE) [![Plugin version](https://img.shields.io/badge/plugin-0.2.1-57534e?style=flat)](CHANGELOG.md)
+[![CI](https://github.com/nik110403/provenote/actions/workflows/ci.yml/badge.svg)](https://github.com/nik110403/provenote/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-8c2f1b?style=flat)](LICENSE) [![Plugin version](https://img.shields.io/badge/plugin-0.2.2-57534e?style=flat)](CHANGELOG.md)
 
 **Turn a reading list into source-grounded notes, check a draft against them, and build a paper.**
 
@@ -11,7 +11,7 @@
 - A paper built as PDF, HTML or DOCX, after a bibliography check.
 
 No API key, no server: it runs inside the assistant you already use (Claude Code, or
-Codex through an adapter). Early-stage, version 0.2.1.
+Codex through an adapter). Early-stage, version 0.2.2.
 
 <sub>Formerly research-kit. Upgrading? Remove the old plugin first; see [INSTALL.md](INSTALL.md#upgrading-from-research-kit).</sub>
 
@@ -127,7 +127,8 @@ Windows invocation and limits: [INSTALL.md](INSTALL.md#platform-and-dependency-c
 
 ## Security
 
-Report vulnerabilities privately; see [SECURITY.md](SECURITY.md).
+Report vulnerabilities privately; see [SECURITY.md](SECURITY.md). What leaves your machine, and
+when: [privacy policy](PRIVACY.md).
 
 ## License
 

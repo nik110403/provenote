@@ -1,15 +1,19 @@
 {
   "name": "provenote",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Turn a reading list into source-grounded notes, check a draft against them, and build a paper.",
   "author": { "name": "Nik Khosravipour", "url": "https://github.com/nik110403" },
   "license": "MIT",
+  "homepage": "https://nik110403.github.io/provenote/",
+  "repository": "https://github.com/nik110403/provenote",
+  "supportUrl": "https://github.com/nik110403/provenote/issues",
+  "privacyPolicyUrl": "https://github.com/nik110403/provenote/blob/main/PRIVACY.md",
   "icon": ".claude-plugin/icon.png",
   "userConfig": {
     "mailto": {
       "type": "string",
       "title": "Contact email for literature search (optional)",
-      "description": "Sent to OpenAlex as a contact address (its polite pool) when the literature-search skill runs. Leave empty to search without one.",
+      "description": "Sent to OpenAlex as a contact address (its polite pool) when the literature-search skill runs; also appears in your session transcript and reaches your model provider. Leave empty to search without one.",
       "default": ""
     }
   }

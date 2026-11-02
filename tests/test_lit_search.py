@@ -321,5 +321,32 @@ class BibExport(unittest.TestCase):
         self.assertEqual(ls._suffixed("k", taken), "kaa")
 
 
+class ReleaseMetadata(unittest.TestCase):
+    def test_plugin_json_urls_and_version(self):
+        plugin = json.loads((ROOT / "plugins/provenote/.claude-plugin/plugin.json").read_text("utf-8"))
+        for key in ("homepage", "repository", "supportUrl", "privacyPolicyUrl"):
+            self.assertTrue(str(plugin.get(key, "")).startswith("https://"), key)
+        cff = (ROOT / "CITATION.cff").read_text("utf-8")
+        self.assertIn(f'\nversion: "{plugin["version"]}"\n', cff)
+
+    def test_skill_quotes_mailto_in_single_quotes(self):
+        skill = (ROOT / "plugins/provenote/skills/literature-search/SKILL.md").read_text("utf-8")
+        self.assertIn("--mailto '${user_config.mailto}'", skill)
+        self.assertNotIn('--mailto "${user_config.mailto}"', skill)
+        self.assertIn("letters, digits and `@._+-`", skill)
+
+    def test_privacy_policy_names_services(self):
+        policy = (ROOT / "PRIVACY.md").read_text("utf-8")
+        for name in ("OpenAlex", "Semantic Scholar", "doi.org", "pandoc"):
+            self.assertIn(name, policy)
+        self.assertNotIn("Only the `literature-search` skill", policy)
+        for heading in ("## Other network use", "## Your assistant"):
+            self.assertIn(heading, policy)
+        for term in ("bibliography:", "paper-build"):
+            self.assertIn(term, policy)
+        for gone in ("The one exception", "stay there unless you share them"):
+            self.assertNotIn(gone, policy)
+
+
 if __name__ == "__main__":
     unittest.main()
