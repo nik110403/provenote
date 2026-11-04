@@ -12,6 +12,8 @@ boundaries, after normalising Unicode (NFKC), whitespace, line-break hyphenation
 quotes/dashes. A note with claims needs quotes. A source with no PDF/md to quote (software, data,
 print book) is declared `source_md: none` + `no_source: <reason>`; such a note has no quotes.
 --strict requires md_sha256 and, when 02_sources/manifest.csv has that column, checks it matches.
+Optional front-matter `tier:` (primary | secondary | partisan, or the emoji 🟢 🟡 🔴) is
+validated when present.
 Prints PASS/FAIL per quote;
 exits 1 on any FAIL, 2 on usage error.
 """
@@ -332,7 +334,31 @@ def load_source(src: Path, citekey: str, strict=False, *, root: Path) -> tuple[d
 RENAME = "rename the pdf and md to <citekey>.* and re-run pdf2md (or edit source_md)"
 
 
+TIERS = {"primary": "primary", "secondary": "secondary", "partisan": "partisan",
+         "\U0001F7E2": "primary", "\U0001F7E1": "secondary", "\U0001F534": "partisan"}
+
+
+def check_tier(meta: dict, name: str) -> list[tuple[bool, str]]:
+    """Optional `tier:` field. Missing or empty is fine; else one of TIERS (case-insensitive)."""
+    raw = meta.get("tier", "")
+    if not isinstance(raw, str) or not raw.strip() or raw.strip().lower() in TIERS or raw.strip() in TIERS:
+        return []
+    return [(False, f"{name}: tier {raw!r} is not valid; use primary, secondary or partisan "
+                    "(or \U0001F7E2 \U0001F7E1 \U0001F534), or leave tier out")]
+
+
 def check_note_full(note: Path, strict=False):
+    """(results, number of quotes, resolved source md or None, no-source reason or None).
+    Same as _check_note_full plus the optional tier check."""
+    res = _check_note_full(note, strict)
+    try:
+        bad = check_tier(parse_note(read_utf8(note))[0], note.name)
+    except (OSError, ValueError):
+        bad = []  # the note could not be read or parsed; _check_note_full already said so
+    return (bad + res[0], *res[1:])
+
+
+def _check_note_full(note: Path, strict=False):
     """(results, number of quotes, resolved source md or None, no-source reason or None)."""
     name = note.name
     try:

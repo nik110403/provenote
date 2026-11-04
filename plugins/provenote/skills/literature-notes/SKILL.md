@@ -34,6 +34,10 @@ instead of failing. Quotes must be at least 5 words long. In the draft, a quotat
 translation, epigraph) goes under a line `<!-- unsourced: <reason> -->`; `check-claims` lists it as UNSOURCED.
 
 Front matter fields: `citekey`, `source_md` (path relative to the project root), `read_scope`
-(`full_text` | `sections` | `abstract_only`), `claims[]`, `quotes[]` with `page` and `text`.
+(`full_text` | `sections` | `abstract_only`), optional `tier` (`primary` | `secondary` | `partisan`, also 🟢 🟡 🔴),
+`claims[]`, `quotes[]` with `page` and `text`.
+`tier` says what kind of source it is: primary = documents, data, testimony; secondary = scholarship, journalism;
+partisan = a camp's own outlet or advocacy. The `source-reader` proposes it with a one-line reason; you decide.
+`verify-quotes` rejects any other value and accepts a note with no `tier`.
 Write `text` as a double-quoted one-line string (escape inner quotes as `\"`); never wrap it over several
 lines and never use flow-style lists (`quotes: [...]`; an empty `quotes: []` is fine).

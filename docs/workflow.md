@@ -22,6 +22,13 @@ root as the working directory for default research commands; run analysis from
 the pipeline directory. Link results into the paper through a deliberate build
 step rather than treating a successful analysis run as a paper rebuild.
 
+## Optional note field: tier
+
+A literature note may carry `tier: primary | secondary | partisan` (or the emoji green, yellow, red
+circles). Primary is documents, data and testimony; secondary is scholarship and journalism; partisan
+is a camp's own outlet or advocacy. `source-reader` proposes it; `verify-quotes` rejects other values
+and accepts notes without it.
+
 ## Evidence boundaries
 
 Search receipts record provider status. A run that loses Semantic Scholar or
