@@ -184,5 +184,31 @@ class OcrPath(unittest.TestCase):
             self.assertFalse((Path(t) / "o" / "a.md").exists())
 
 
+class PdftotextOnPath(unittest.TestCase):
+    """Git for Windows puts an xpdf pdftotext (its -v exits 99) ahead of Poppler's."""
+
+    def test_skips_an_unusable_pdftotext_for_a_later_one(self):
+        sep = pdf2md.os.pathsep
+        found = {"git": "git/pdftotext", "poppler": "poppler/pdftotext"}
+        codes = {"git/pdftotext": 99, "poppler/pdftotext": 0}
+
+        def which(name, path=None):
+            return found.get(path)
+
+        def run(cmd, **kw):
+            return mock.Mock(returncode=codes[cmd[0]])
+
+        with mock.patch.dict(pdf2md.os.environ, {"PATH": sep.join(["git", "poppler"])}), \
+                mock.patch.object(pdf2md.shutil, "which", side_effect=which), \
+                mock.patch.object(pdf2md.subprocess, "run", side_effect=run):
+            self.assertEqual(pdf2md.find_pdftotext(), "poppler/pdftotext")
+
+    def test_falls_back_to_the_first_hit_when_none_is_usable(self):
+        with mock.patch.dict(pdf2md.os.environ, {"PATH": "git"}), \
+                mock.patch.object(pdf2md.shutil, "which", return_value="git/pdftotext"), \
+                mock.patch.object(pdf2md.subprocess, "run", return_value=mock.Mock(returncode=99)):
+            self.assertEqual(pdf2md.find_pdftotext(), "git/pdftotext")
+
+
 if __name__ == "__main__":
     unittest.main()
