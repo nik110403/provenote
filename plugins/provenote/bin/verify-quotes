@@ -12,6 +12,8 @@ boundaries, after normalising Unicode (NFKC), whitespace, line-break hyphenation
 quotes/dashes. A note with claims needs quotes. A source with no PDF/md to quote (software, data,
 print book) is declared `source_md: none` + `no_source: <reason>`; such a note has no quotes.
 --strict requires md_sha256 and, when 02_sources/manifest.csv has that column, checks it matches.
+A provenote.json above the note changes the folder names (layout keys
+notes, sources_md, sources_pdf, manifest); the project root is then the folder holding it.
 Prints PASS/FAIL per quote;
 exits 1 on any FAIL, 2 on usage error.
 """
@@ -223,6 +225,40 @@ def parse_note(text: str) -> tuple[dict, list[dict], list[str]]:
     return meta, quotes, claims
 
 
+# Optional layout file provenote.json: keys below, paths relative to the folder holding it.
+# No file: Nik's numbered layout. Unknown keys and absolute or ".." paths are refused.
+LAYOUT = {"notes": "01_notes/lit", "search": "01_notes/search", "sources_md": "02_sources/md",
+          "sources_pdf": "02_sources/pdf", "manifest": "02_sources/manifest.csv",
+          "bib": "07_references/references.bib", "paper_dir": "10_paper"}
+
+
+def find_layout(start="."):
+    """(folder holding provenote.json or None, layout). Walks up from start (a path is read, never listed)."""
+    here = Path(os.path.abspath(start))
+    for d in (here, *here.parents):
+        f = d / "provenote.json"
+        if not f.is_file():
+            continue
+        try:
+            data = json.loads(f.read_text(encoding="utf-8-sig"))
+        except (OSError, ValueError) as e:
+            raise SystemExit(f"{f}: cannot read layout file ({e})")
+        bad = [k for k, v in (data.items() if isinstance(data, dict) else [("<file>", None)])
+               if k not in LAYOUT or not isinstance(v, str) or not v.strip()
+               or Path(v).is_absolute() or ".." in Path(v).parts]
+        if bad:
+            raise SystemExit(f"{f}: bad layout entries {bad}; allowed keys {sorted(LAYOUT)}, "
+                             "each a relative path without '..'")
+        return d, {**LAYOUT, **data}
+    return None, dict(LAYOUT)
+
+
+def layout_path(key, start="."):
+    """Path string for a layout key: relative as before without a layout file, else under its folder."""
+    base, lay = find_layout(start)
+    return str(base / lay[key]) if base else lay[key]
+
+
 def md_meta(text: str) -> tuple[dict, str]:
     """(simple key: value front matter, canonical body) of a source md."""
     t = canonical(text.lstrip("\ufeff"))
@@ -237,11 +273,20 @@ def md_meta(text: str) -> tuple[dict, str]:
     return meta, t[m.end():]
 
 
+def lay(root: Path) -> dict:
+    """Layout (provenote.json found from root upward, else the defaults)."""
+    return find_layout(root)[1]
+
+
 def project_root(note: Path) -> Path:
-    """Parent of the OUTERMOST path component named 01_notes in the note's absolute, unresolved path.
+    """The folder holding provenote.json above the note, if any; else the parent of the OUTERMOST path
+    component named 01_notes in the note's absolute, unresolved path.
     Only path components are read, never directory contents, so planted folders cannot move the root.
     No such component: the note's grandparent's parent (strict mode rejects that, see check_note_full)."""
     here = Path(os.path.abspath(note)).parent
+    base = find_layout(here)[0]
+    if base:
+        return base
     for d in (*reversed(here.parents), here):
         if d.name == "01_notes":
             return d.parent
@@ -249,8 +294,12 @@ def project_root(note: Path) -> Path:
 
 
 def under_notes(note: Path) -> bool:
-    """The note's absolute, unresolved path has a 01_notes component."""
-    return "01_notes" in Path(os.path.abspath(note)).parent.parts
+    """The note's absolute, unresolved path lies in the notes folder (a 01_notes component by default)."""
+    here = Path(os.path.abspath(note)).parent
+    base, ly = find_layout(here)
+    if base:
+        return here.is_relative_to(base / ly["notes"])
+    return "01_notes" in here.parts
 
 
 def inside(path: Path, root: Path) -> bool:
@@ -267,12 +316,12 @@ def find_source(note: Path, ref: str) -> Path | None:
 
 def in_sources(note: Path, src: Path) -> bool:
     root = project_root(note)
-    return src.resolve().is_relative_to((root / "02_sources" / "md").resolve())
+    return src.resolve().is_relative_to((root / lay(root)["sources_md"]).resolve())
 
 
 def manifest_rows(root: Path):
     """(rows or None if absent, fieldnames, broken). broken = exists but unreadable or unparsable."""
-    mf = root / "02_sources" / "manifest.csv"
+    mf = root / lay(root)["manifest"]
     if not mf.exists():
         return None, [], False
     try:
@@ -307,11 +356,12 @@ def load_source(src: Path, citekey: str, strict=False, *, root: Path) -> tuple[d
     has_col, mval, broken = manifest_hash(src, root)
     if strict == "auto":
         strict = has_col
-    if src.resolve().parent != (root / "02_sources" / "md").resolve():
-        problems.append(f"{src.name} must sit directly in 02_sources/md/ (not a subdirectory)")
+    smd = lay(root)["sources_md"]
+    if src.resolve().parent != (root / smd).resolve():
+        problems.append(f"{src.name} must sit directly in {smd}/ (not a subdirectory)")
     want = fm.get("md_sha256", "").lower()
     if strict and broken:
-        problems.append("02_sources/manifest.csv exists but cannot be read; fix it or re-run pdf2md --force")
+        problems.append(f"{lay(root)['manifest']} exists but cannot be read; fix it or re-run pdf2md --force")
     if want:
         if body_hash(text) != want:
             problems.append(f"source md edited after conversion (md_sha256 mismatch): {src.name}")
@@ -340,14 +390,16 @@ def check_note_full(note: Path, strict=False):
     except (OSError, ValueError) as e:
         return [(False, f"{name}: cannot read note ({e})")], 0, None, None
     out: list[tuple[bool, str]] = []
+    ly = lay(project_root(note))
+    nd, smd = ly["notes"] if find_layout(project_root(note))[0] else "01_notes", ly["sources_md"]
     if not inside(note, project_root(note)):
         return [(False, f"{name}: note (or its folder) resolves outside the project, e.g. via a symlink; "
-                        "symlinked note folders are not supported, keep notes inside 01_notes/")], 0, None, None
+                        f"symlinked note folders are not supported, keep notes inside {nd}/")], 0, None, None
     if project_root(Path(os.path.realpath(note))).resolve() != project_root(note).resolve():
         return [(False, f"{name}: note path resolves to a different project, e.g. via a symlink; "
-                        "keep notes in real folders under the project's 01_notes/")], 0, None, None
+                        f"keep notes in real folders under the project's {nd}/")], 0, None, None
     if strict and not under_notes(note):
-        return [(False, f"{name}: note is not under <root>/01_notes/")], 0, None, None
+        return [(False, f"{name}: note is not under <root>/{nd}/")], 0, None, None
     ck, ref = str(meta.get("citekey", "")), str(meta.get("source_md", ""))
     if ref.lower() == "none":  # software, dataset, print book: nothing to quote
         why = str(meta.get("no_source", "")).strip()
@@ -359,9 +411,9 @@ def check_note_full(note: Path, strict=False):
             out.append((False, f"{name}: citekey {ck!r} does not match the file name; rename the note to {ck}.md"))
         root = project_root(note)
         rows, _, _ = manifest_rows(root)
-        if (root / "02_sources/md" / f"{ck}.md").is_file() or (root / "02_sources/pdf" / f"{ck}.pdf").is_file() \
+        if (root / smd / f"{ck}.md").is_file() or (root / ly["sources_pdf"] / f"{ck}.pdf").is_file() \
                 or any(r.get("stem") == ck for r in rows or []):
-            out.append((False, f"{name}: this source has a converted copy; use source_md: 02_sources/md/{ck}.md"))
+            out.append((False, f"{name}: this source has a converted copy; use source_md: {smd}/{ck}.md"))
         return out or [(True, f"NO-SOURCE: {why} ({name})")], 0, None, why
     if not (quotes or claims or ref):
         return [(False, f"{name}: empty note (no quotes, no claims, no source_md; misspelled keys?)")], 0, None, None
@@ -380,7 +432,7 @@ def check_note_full(note: Path, strict=False):
         return out + [(False, f"{name}: quote {i}: source_md not found: {ref!r}")
                       for i, _ in enumerate(quotes, 1)], len(quotes), None, None
     if not in_sources(note, src):
-        return out + [(False, f"{name}: source_md must be a file under 02_sources/md/ (got {ref!r})")], len(quotes), None, None
+        return out + [(False, f"{name}: source_md must be a file under {smd}/ (got {ref!r})")], len(quotes), None, None
     try:
         pages, _, problems = load_source(src, ck, strict, root=project_root(note))
     except (OSError, ValueError) as e:

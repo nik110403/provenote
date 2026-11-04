@@ -22,6 +22,31 @@ root as the working directory for default research commands; run analysis from
 the pipeline directory. Link results into the paper through a deliberate build
 step rather than treating a successful analysis run as a paper rebuild.
 
+## Folder layout: provenote.json
+
+The tables and skills use Nik's numbered folders. A project that keeps its files elsewhere puts an
+optional `provenote.json` in its root. The tools find it by walking up from the note, the working
+directory or `--root`; paths are relative to the folder holding the file, and any key left out keeps
+its default. Without the file nothing changes. Explicit flags (`--root`, `--out`, `--bib`, a paper
+path) win over the file. `new-project` always scaffolds the default layout.
+
+```json
+{"notes": "notes/lit", "sources_md": "sources/md", "bib": "refs/library.bib"}
+```
+
+| Key | Default | Read by |
+|---|---|---|
+| `notes` | `01_notes/lit` | `verify-quotes`, `check-claims`, `build-paper --grounding` |
+| `search` | `01_notes/search` | `lit-search` (`--out`) |
+| `sources_md` | `02_sources/md` | `pdf2md` (`--out`), `verify-quotes`, `check-docx` |
+| `sources_pdf` | `02_sources/pdf` | `verify-quotes` (converted-copy check) |
+| `manifest` | `02_sources/manifest.csv` | `pdf2md`, `verify-quotes` |
+| `bib` | `07_references/references.bib` | `lit-search --export-bib`, `check-bib` |
+| `paper_dir` | `10_paper` | `build-paper`, `check-bib` |
+
+Unknown keys, absolute paths and `..` are refused with a message. `doctor` and the `new-*` scaffolds
+still use the default names.
+
 ## Evidence boundaries
 
 Search receipts record provider status. A run that loses Semantic Scholar or

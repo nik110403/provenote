@@ -3,7 +3,7 @@ name: review-against-notes
 description: Review a draft against the project's literature notes - mechanical citation checks first, then model judgment, then an adversarial pass, ending in a dated review report. Use when the user wants a draft fact-checked against their notes before submission.
 ---
 
-Requires: Python 3.9+; a draft with pandoc citations (`[@key]`) and literature notes in `01_notes/lit/` (see the literature-notes skill).
+Requires: Python 3.9+; a draft with pandoc citations (`[@key]`) and literature notes in the notes folder (layout `notes`, default `01_notes/lit/`; see the literature-notes skill).
 
 # Review against notes
 
@@ -12,7 +12,7 @@ Order matters: mechanical checks first, model judgment second, adversary last. R
 1. Verify quotes in every note:
 
    ```
-   verify-quotes --strict 01_notes/lit/*.md
+   verify-quotes --strict <notes folder>/*.md      # default 01_notes/lit/*.md
    ```
 
    If not on PATH, run it from the kit's plugins/provenote/bin/. Fix FAILs before going on.
@@ -22,9 +22,9 @@ Order matters: mechanical checks first, model judgment second, adversary last. R
    check-claims [--strict-quotes] --root <project> <draft.md>
    ```
 
-   Always pass `--root <your project>` (the folder that holds `01_notes/` and `02_sources/`) when you know it:
+   Always pass `--root <your project>` (the folder that holds the notes and sources folders, or `provenote.json`) when you know it:
    for a draft from someone else, or when running from a script, a folder the draft ships with would otherwise
-   be trusted. Without `--root` it looks for `01_notes/lit` in the draft's and the current directory's ancestors;
+   be trusted. Without `--root` it looks for the notes folder (default `01_notes/lit`) in the draft's and the current directory's ancestors;
    more than one, or an unreadable folder, stops the run with exit 2. It prints `notes: <folder>` on stderr:
    check that this is your project's notes folder.
 

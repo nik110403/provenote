@@ -6,6 +6,7 @@ Usage:
   lit-search --export-bib DOI [DOI...] [--bib 07_references/references.bib]
 
 Search writes <out>/<date>-<slug>.{csv,md,receipt.json} (default out: 01_notes/search).
+provenote.json (layout keys search, bib) changes the defaults; explicit flags win.
 --mailto EMAIL sends a contact address to OpenAlex's polite pool (optional; the address is never
 written to the receipt). The tool reads no API keys or contact details from the environment (urllib's standard proxy
 variables still apply); Semantic
@@ -37,6 +38,40 @@ OA = "https://api.openalex.org/works"
 S2 = "https://api.semanticscholar.org/graph/v1/paper/search"
 S2_FIELDS = "title,year,externalIds,citationCount,venue,authors"
 CAP = 20  # snowball cap per direction per seed
+
+
+# Optional layout file provenote.json: keys below, paths relative to the folder holding it.
+# No file: Nik's numbered layout. Unknown keys and absolute or ".." paths are refused.
+LAYOUT = {"notes": "01_notes/lit", "search": "01_notes/search", "sources_md": "02_sources/md",
+          "sources_pdf": "02_sources/pdf", "manifest": "02_sources/manifest.csv",
+          "bib": "07_references/references.bib", "paper_dir": "10_paper"}
+
+
+def find_layout(start="."):
+    """(folder holding provenote.json or None, layout). Walks up from start (a path is read, never listed)."""
+    here = Path(start).absolute()
+    for d in (here, *here.parents):
+        f = d / "provenote.json"
+        if not f.is_file():
+            continue
+        try:
+            data = json.loads(f.read_text(encoding="utf-8-sig"))
+        except (OSError, ValueError) as e:
+            raise SystemExit(f"{f}: cannot read layout file ({e})")
+        bad = [k for k, v in (data.items() if isinstance(data, dict) else [("<file>", None)])
+               if k not in LAYOUT or not isinstance(v, str) or not v.strip()
+               or Path(v).is_absolute() or ".." in Path(v).parts]
+        if bad:
+            raise SystemExit(f"{f}: bad layout entries {bad}; allowed keys {sorted(LAYOUT)}, "
+                             "each a relative path without '..'")
+        return d, {**LAYOUT, **data}
+    return None, dict(LAYOUT)
+
+
+def layout_path(key, start="."):
+    """Path string for a layout key: relative as before without a layout file, else under its folder."""
+    base, lay = find_layout(start)
+    return str(base / lay[key]) if base else lay[key]
 
 
 def http_get(url, accept="application/json", opener=urllib.request.urlopen, sleep=time.sleep,
@@ -345,10 +380,12 @@ def main(argv=None, fetch=http_get):
                     help="one hop over references and citations of the top K (default 5)")
     ap.add_argument("--mailto", default="", metavar="EMAIL",
                     help="contact address for OpenAlex's polite pool (optional)")
-    ap.add_argument("--out", default="01_notes/search")
+    ap.add_argument("--out", help="output folder (default: layout search, 01_notes/search)")
     ap.add_argument("--export-bib", nargs="+", metavar="DOI")
-    ap.add_argument("--bib", default="07_references/references.bib")
+    ap.add_argument("--bib", help="BibTeX file (default: layout bib, 07_references/references.bib)")
     a = ap.parse_args(argv)
+    a.out = a.out or layout_path("search")
+    a.bib = a.bib or layout_path("bib")
     if a.export_bib:
         added, skipped, failed = export_bib(a.export_bib, a.bib, fetch)
         print(f"added {len(added)}, skipped {len(skipped)} (DOI already present), failed {len(failed)}")

@@ -411,9 +411,9 @@ def main(argv):
         if any(r.get(k, "") != actual[k] for k in ("quote", "quote_sha256", "document_sha256")):
             verdicts.append((False, qid, "stale quote or document digest")); continue
         ref, page = r.get("source_md", ""), r.get("page", "")
-        src = root / ref
-        if not ref or not under(src, root / "02_sources/md") or not src.is_file() or not src.resolve().parent == (root / "02_sources/md").resolve():
-            verdicts.append((False, qid, "source_md must be an explicit file directly under root/02_sources/md")); continue
+        src, smd = root / ref, vq.lay(root)["sources_md"]
+        if not ref or not under(src, root / smd) or not src.is_file() or not src.resolve().parent == (root / smd).resolve():
+            verdicts.append((False, qid, f"source_md must be an explicit file directly under root/{smd}")); continue
         if not page.isascii() or not page.isdigit() or int(page) < 1:
             verdicts.append((False, qid, "page must be a positive integer")); continue
         want = vq._ws(actual["quote"])

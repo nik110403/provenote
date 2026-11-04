@@ -4,7 +4,8 @@
 Usage: check-claims [--strict-quotes] [--root <project>] <draft.md>
 
 Finds paragraphs carrying a pandoc citation ([@key], [@a; @b], [@{key}], narrative @key) and maps
-each key to <project>/01_notes/lit/<key>.md. With --root the project is given. Without it, every folder
+each key to <project>/01_notes/lit/<key>.md (or the `notes` path in provenote.json). With --root the
+project is given. Without it, every folder
 that holds 01_notes/lit among the draft's ancestors (lexical and physical path) and the current directory
 is a candidate: exactly one is used, none means no notes, more than one is an error (exit 2, pass --root).
 The notes folder used is printed to stderr as `notes: <path>`. Code, HTML comments, URLs and emails are ignored. Every cited note is run through
@@ -79,7 +80,7 @@ class NoteProbeError(Exception):
     pass
 
 
-def note_candidates(draft: Path) -> dict[Path, Path]:
+def note_candidates(draft: Path, vq) -> dict[Path, tuple[Path, Path]]:
     """Every distinct (resolved) <B>/01_notes/lit directory for B in the draft's ancestors, taken lexically
     (unresolved) and physically (realpath), and the current directory and ITS ancestors taken both ways. No ordering is
     applied: the caller accepts exactly one, so no planted folder can win by position."""
@@ -92,12 +93,12 @@ def note_candidates(draft: Path) -> dict[Path, Path]:
     here += [Path(os.path.realpath(draft)).parent, Path(os.path.realpath(here[0]))]
     cwds.append(Path(os.path.realpath(cwd)))
     bases = [b for h in (*here, *cwds) for b in (h, *h.parents)]  # draft and cwd, each with all ancestors
-    found: dict[Path, Path] = {}  # resolved -> first (unresolved) path, which is what verify-quotes must see
+    found: dict[Path, tuple[Path, Path]] = {}  # resolved -> (first unresolved path, which is what verify-quotes must see; its project)
     for b in bases:
-        lit = b / "01_notes/lit"
+        lit = b / (vq.find_layout(b)[1]["notes"] if (b / "provenote.json").is_file() else "01_notes/lit")
         try:
             if lit.is_dir():
-                found.setdefault(lit.resolve(), lit)
+                found.setdefault(lit.resolve(), (lit, b))
         except OSError as e:
             raise NoteProbeError(f"cannot inspect {lit}: {e}") from e
     return found
@@ -315,13 +316,16 @@ def main(argv: list[str]) -> int:
         print(f"check-claims: cannot read draft or verify-quotes: {e}", file=sys.stderr)
         return 2
     if root_arg is not None:
-        notes = Path(os.path.abspath(root_arg)) / "01_notes/lit"
+        rootp = Path(os.path.abspath(root_arg))
+        lbase, ly = vq.find_layout(rootp)
+        rootp = lbase or rootp
+        notes = rootp / (ly["notes"] if lbase else "01_notes/lit")
         if not notes.is_dir():
             print(f"check-claims: --root {root_arg}: {notes} is not a directory", file=sys.stderr)
             return 2
     else:
         try:
-            cands = note_candidates(draft)
+            cands = note_candidates(draft, vq)
         except NoteProbeError as e:
             print(f"check-claims: {e} -- pass --root <project>", file=sys.stderr)
             return 2
@@ -329,7 +333,7 @@ def main(argv: list[str]) -> int:
             print("check-claims: ambiguous notes folder: " + ", ".join(str(c) for c in cands)
                   + " -- pass --root <project>", file=sys.stderr)
             return 2
-        notes = next(iter(cands.values())) if cands else None
+        notes, rootp = next(iter(cands.values())) if cands else (None, None)
     print(f"notes: {notes if notes else '(none found)'}", file=sys.stderr)
     cache: dict = {}
 
@@ -344,7 +348,7 @@ def main(argv: list[str]) -> int:
         elif path is not None and path.is_file():
             results, nq, src, nosrc = vq.check_note_full(path, "auto")
             bad = [m for ok, m in results if not ok]
-            if vq.project_root(path).resolve() != notes.parent.parent.resolve():
+            if vq.project_root(path).resolve() != rootp.resolve():
                 bad.append(f"{k}.md: verify-quotes would use a different project root "
                            f"({vq.project_root(path)}) than the notes folder's project; pass --root")
             whole = None

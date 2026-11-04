@@ -2,7 +2,8 @@
 """Check a BibTeX file and its use in a pandoc-markdown paper.
 
 Usage: check-bib [references.bib] [paper.md]
-Defaults: 07_references/references.bib and 10_paper/paper.md (run from the project root).
+Defaults: 07_references/references.bib and 10_paper/paper.md (run from the project root), or the
+paths in provenote.json (layout keys bib, paper_dir).
 
 Errors (exit 1): duplicate keys; entries missing author/editor, title or year; malformed DOI
 (expected 10.NNNN+/suffix); keys cited in the paper but absent from the .bib.
@@ -16,11 +17,47 @@ if sys.version_info < (3, 9):
     sys.exit("check-bib needs Python 3.9 or newer")
 
 import re
+import json
+import os
 from pathlib import Path
 
 DOI_RE = re.compile(r"^10\.\d{4,9}/\S+$")
 CITE_RE = re.compile(r"(?<![\w.@])@\{?([A-Za-z0-9_][\w:.#$%&+?<>~/-]*)")
 SKIP_TYPES = {"comment", "string", "preamble"}
+
+
+# Optional layout file provenote.json: keys below, paths relative to the folder holding it.
+# No file: Nik's numbered layout. Unknown keys and absolute or ".." paths are refused.
+LAYOUT = {"notes": "01_notes/lit", "search": "01_notes/search", "sources_md": "02_sources/md",
+          "sources_pdf": "02_sources/pdf", "manifest": "02_sources/manifest.csv",
+          "bib": "07_references/references.bib", "paper_dir": "10_paper"}
+
+
+def find_layout(start="."):
+    """(folder holding provenote.json or None, layout). Walks up from start (a path is read, never listed)."""
+    here = Path(os.path.abspath(start))
+    for d in (here, *here.parents):
+        f = d / "provenote.json"
+        if not f.is_file():
+            continue
+        try:
+            data = json.loads(f.read_text(encoding="utf-8-sig"))
+        except (OSError, ValueError) as e:
+            raise SystemExit(f"{f}: cannot read layout file ({e})")
+        bad = [k for k, v in (data.items() if isinstance(data, dict) else [("<file>", None)])
+               if k not in LAYOUT or not isinstance(v, str) or not v.strip()
+               or Path(v).is_absolute() or ".." in Path(v).parts]
+        if bad:
+            raise SystemExit(f"{f}: bad layout entries {bad}; allowed keys {sorted(LAYOUT)}, "
+                             "each a relative path without '..'")
+        return d, {**LAYOUT, **data}
+    return None, dict(LAYOUT)
+
+
+def layout_path(key, start="."):
+    """Path string for a layout key: relative as before without a layout file, else under its folder."""
+    base, lay = find_layout(start)
+    return str(base / lay[key]) if base else lay[key]
 
 
 def parse_bib(text: str):
@@ -75,8 +112,8 @@ def main(argv) -> int:
     if len(argv) > 2:
         print(__doc__)
         return 2
-    bib = Path(argv[0] if argv else "07_references/references.bib")
-    paper = Path(argv[1] if len(argv) > 1 else "10_paper/paper.md")
+    bib = Path(argv[0] if argv else layout_path("bib"))
+    paper = Path(argv[1] if len(argv) > 1 else Path(layout_path("paper_dir")) / "paper.md")
     if not bib.is_file():
         print(f"check-bib: no such file: {bib}", file=sys.stderr)
         return 2
