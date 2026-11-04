@@ -2,6 +2,7 @@
 citekey: smith2020
 source_md: 02_sources/md/smith2020.md
 read_scope: full_text   # full_text | sections | abstract_only
+tier:             # optional; leave blank until judged. primary = documents, data, testimony; secondary = scholarship, journalism; partisan = a camp's own outlet or advocacy (or 🟢 🟡 🔴).
 claims:
   - "One-sentence claim the source makes."
 quotes:

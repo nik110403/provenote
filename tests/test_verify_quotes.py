@@ -215,5 +215,41 @@ class VerifyQuotes(unittest.TestCase):
         self.assertEqual(r.returncode, 2)
 
 
+class Tier(unittest.TestCase):
+    def run_tier(self, line):
+        with tempfile.TemporaryDirectory() as t:
+            root = Path(t)
+            (root / "02_sources/md").mkdir(parents=True)
+            (root / "02_sources/md/a.md").write_text(SOURCE, encoding="utf-8")
+            (root / "01_notes/lit").mkdir(parents=True)
+            n = root / "01_notes/lit/a.md"
+            n.write_text(note([(2, "always and everywhere a monetary phenomenon")]).replace(
+                "read_scope: full_text\n", "read_scope: full_text\n" + line), encoding="utf-8")
+            return subprocess.run([sys.executable, str(TOOL), str(n)],
+                                  capture_output=True, text=True, encoding="utf-8", errors="replace")
+
+    def test_valid_values(self):
+        for v in ("primary", "secondary", "partisan", "Primary", '"secondary"  # why'):
+            with self.subTest(v=v):
+                r = self.run_tier(f"tier: {v}\n")
+                self.assertEqual(r.returncode, 0, r.stdout)
+
+    def test_emoji_aliases(self):
+        for v in ("\U0001F7E2", "\U0001F7E1", "\U0001F534"):
+            with self.subTest(v=v):
+                r = self.run_tier(f"tier: {v}\n")
+                self.assertEqual(r.returncode, 0, r.stdout)
+
+    def test_missing_or_empty_tier_is_fine(self):
+        self.assertEqual(self.run_tier("").returncode, 0)
+        self.assertEqual(self.run_tier("tier:\n").returncode, 0)
+
+    def test_invalid_tier_is_rejected_with_a_clear_message(self):
+        r = self.run_tier("tier: reliable\n")
+        self.assertEqual(r.returncode, 1)
+        self.assertIn("tier 'reliable' is not valid; use primary, secondary or partisan", r.stdout)
+        self.assertIn("PASS", r.stdout)  # the quotes themselves still verify
+
+
 if __name__ == "__main__":
     unittest.main()
