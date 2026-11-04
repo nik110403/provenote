@@ -87,6 +87,13 @@ def diagnose(workflow, project=None):
             add(name + ".missing", name + " not found on PATH", package_fixes(name))
             continue
         version, error = tool_version(path, flag)
+        if error and name == "pdftotext":
+            # pdf2md skips an unusable pdftotext (Git's xpdf) for a later one on PATH.
+            for folder in os.environ.get("PATH", "").split(os.pathsep):
+                later = shutil.which(name, path=folder) if folder else None
+                if later and tool_version(later, flag)[1] is None:
+                    version, error = tool_version(later, flag)
+                    break
         if error:
             add(name + ".unusable", str(path) + ": " + error, package_fixes(name))
         elif name == "pandoc":
