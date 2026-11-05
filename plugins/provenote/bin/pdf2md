@@ -62,10 +62,26 @@ def layout_path(key, start="."):
     """Path string for a layout key: relative as before without a layout file, else under its folder."""
     base, lay = find_layout(start)
     return str(base / lay[key]) if base else lay[key]
+def find_pdftotext():
+    """First pdftotext on PATH whose `-v` exits 0. Git for Windows ships an
+    xpdf build (exit 99) ahead of Poppler, so the first hit is not enough."""
+    for folder in os.environ.get("PATH", "").split(os.pathsep):
+        found = shutil.which("pdftotext", path=folder) if folder else None
+        if not found:
+            continue
+        try:
+            if subprocess.run([found, "-v"], capture_output=True, timeout=10,
+                              stdin=subprocess.DEVNULL).returncode == 0:
+                return found
+        except (OSError, subprocess.TimeoutExpired):
+            continue
+    return shutil.which("pdftotext")
 
 
 def run(cmd):
     """Run an external command; raise ToolMissing if the binary is absent."""
+    if cmd[0] == "pdftotext":
+        cmd = [find_pdftotext() or "pdftotext"] + cmd[1:]
     if shutil.which(cmd[0]) is None:
         raise ToolMissing(f"required program '{cmd[0]}' not found on PATH")
     return subprocess.run(cmd, capture_output=True, text=True,
