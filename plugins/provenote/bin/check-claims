@@ -5,7 +5,8 @@ Usage: check-claims [--strict-quotes] [--root <project>] <draft.md>
 
 Finds paragraphs carrying a pandoc citation ([@key], [@a; @b], [@{key}], narrative @key) and maps
 each key to <project>/01_notes/lit/<key>.md (or the `notes` path in provenote.json). With --root the
-project is given. Without it, every folder
+project is pinned: its own provenote.json, if any, is the only one read. Without it, only the current
+directory's provenote.json is read, never one in a folder above, and every folder
 that holds 01_notes/lit among the draft's ancestors (lexical and physical path) and the current directory
 is a candidate: exactly one is used, none means no notes, more than one is an error (exit 2, pass --root).
 The notes folder used is printed to stderr as `notes: <path>`. Code, HTML comments, URLs and emails are ignored. Every cited note is run through
@@ -94,8 +95,11 @@ def note_candidates(draft: Path, vq) -> dict[Path, tuple[Path, Path]]:
     cwds.append(Path(os.path.realpath(cwd)))
     bases = [b for h in (*here, *cwds) for b in (h, *h.parents)]  # draft and cwd, each with all ancestors
     found: dict[Path, tuple[Path, Path]] = {}  # resolved -> (first unresolved path, which is what verify-quotes must see; its project)
+    cbase, cly = vq.find_layout(cwd)  # the current directory's provenote.json only, never an ancestor's
+    real_cwd = os.path.realpath(cwd)
     for b in bases:
-        lit = b / (vq.find_layout(b)[1]["notes"] if (b / "provenote.json").is_file() else "01_notes/lit")
+        own = cbase is not None and os.path.realpath(b) == real_cwd
+        lit = b / (cly["notes"] if own else "01_notes/lit")
         try:
             if lit.is_dir():
                 found.setdefault(lit.resolve(), (lit, b))
@@ -317,8 +321,8 @@ def main(argv: list[str]) -> int:
         return 2
     if root_arg is not None:
         rootp = Path(os.path.abspath(root_arg))
-        lbase, ly = vq.find_layout(rootp)
-        rootp = lbase or rootp
+        lbase, ly = vq.find_layout(rootp)  # --root pins the project: its own provenote.json or none
+        vq.PINNED_ROOT = str(rootp)  # verify-quotes then reads the same file, never the cwd's
         notes = rootp / (ly["notes"] if lbase else "01_notes/lit")
         if not notes.is_dir():
             print(f"check-claims: --root {root_arg}: {notes} is not a directory", file=sys.stderr)

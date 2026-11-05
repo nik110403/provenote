@@ -37,6 +37,6 @@ An occupied target is not an environment fault; never clear it as a repair.
 5. Tell the user the next stage: put PDFs in `02_sources/pdf/`, then convert, take notes, and
    verify quotes.
 
-Layout created (Nik's numbered default; a `provenote.json` can rename it, see docs/workflow.md): `00_admin` (task list with a Resume-here block, progress log),
+Layout created (the default layout; a `provenote.json` can rename it, see docs/workflow.md): `00_admin` (task list with a Resume-here block, progress log),
 `01_notes` (open questions), `02_sources`, `03_code`, `05_figures`, `06_tables`,
 `07_references` (empty `references.bib`), `10_paper`.

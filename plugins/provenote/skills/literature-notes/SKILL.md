@@ -8,8 +8,8 @@ Requires: Python 3.9+; source markdown from the pdf-to-markdown step (with `<!--
 # Literature notes
 
 One note per source at `<citekey>.md` in the notes folder (layout `notes`, default `01_notes/lit`). Template: `template.md` beside this SKILL.md.
-Folder names come from an optional `provenote.json` in the project root (see docs/workflow.md); the defaults below are Nik's numbered layout.
-The project root is the folder holding `provenote.json`, or without one the folder above `01_notes/`; keep notes in real (non-symlinked) folders under it. Without a layout file, do not nest a project under a folder named `01_notes`. The source hash/manifest catches accidental edits; it is not protection against someone with write access to the project's own sources folder (layout `sources_md`, default `02_sources/md`).
+Folder names come from an optional `provenote.json` in the project root (see docs/workflow.md); the defaults below are the default layout. Run the tools from the project root: `provenote.json` is read from the working directory (or `--root`) only, never from a folder above.
+The project root is that folder when it holds `provenote.json`, or without one the folder above `01_notes/`; keep notes in real (non-symlinked) folders under it. Without a layout file, do not nest a project under a folder named `01_notes`. The source hash/manifest catches accidental edits; it is not protection against someone with write access to the project's own sources folder (layout `sources_md`, default `02_sources/md`).
 Source markdown carries page markers of the form `<!-- page N -->`; quote pages refer to them.
 
 1. Pick the source markdown file(s) in the sources folder (layout `sources_md`, default `02_sources/md`) and a citekey for each (match the bibliography, layout `bib`, default `07_references/references.bib`, if the entry exists).

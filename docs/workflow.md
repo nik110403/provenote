@@ -24,10 +24,11 @@ step rather than treating a successful analysis run as a paper rebuild.
 
 ## Folder layout: provenote.json
 
-The tables and skills use Nik's numbered folders. A project that keeps its files elsewhere puts an
-optional `provenote.json` in its root. The tools find it by walking up from the note, the working
-directory or `--root`; paths are relative to the folder holding the file, and any key left out keeps
-its default. Without the file nothing changes. Explicit flags (`--root`, `--out`, `--bib`, a paper
+The tables and skills use the default layout, the numbered folders. A project that keeps its files
+elsewhere puts an optional `provenote.json` in its root. The tools read it from one folder only: the
+`--root` folder when given, else the working directory, so run them from the project root. A
+`provenote.json` in a folder above is never read. Paths are relative to the project root, and any key
+left out keeps its default. Without the file nothing changes. Explicit flags (`--root`, `--out`, `--bib`, a paper
 path) win over the file. `new-project` always scaffolds the default layout.
 
 ```json
@@ -44,7 +45,8 @@ path) win over the file. `new-project` always scaffolds the default layout.
 | `bib` | `07_references/references.bib` | `lit-search --export-bib`, `check-bib` |
 | `paper_dir` | `10_paper` | `build-paper`, `check-bib` |
 
-Unknown keys, absolute paths and `..` are refused with a message. `doctor` and the `new-*` scaffolds
+Unknown keys, absolute paths, Windows drive and root forms (`C:x`, `\Windows\x`) and `..` are
+refused with a message. `doctor` and the `new-*` scaffolds
 still use the default names.
 
 ## Evidence boundaries

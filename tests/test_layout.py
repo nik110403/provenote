@@ -15,6 +15,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from test_pdf2md import make_pdf  # noqa: E402
 
 BIN = Path(__file__).resolve().parent.parent / "plugins/provenote/bin"
+HELPER_COPIES = ("build-paper", "check-bib", "lit-search", "pdf2md", "verify-quotes")
 SOURCE = ("---\ntitle: T\n---\n<!-- page 1 -->\nMoney is a social convention that evolved over many "
           "centuries of trade.\n")
 NOTE = ('---\ncitekey: a\nsource_md: {src}/a.md\nclaims:\n  - "A claim."\nquotes:\n  - page: 1\n'
@@ -46,7 +47,7 @@ def chdir(path):
 
 
 class Project(unittest.TestCase):
-    """A project whose folders differ from Nik's numbered layout."""
+    """A project whose folders differ from the default layout."""
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.root = Path(self.tmp.name)
@@ -61,18 +62,58 @@ class Project(unittest.TestCase):
         self.tmp.cleanup()
 
 
+class HelperCopies(unittest.TestCase):
+    def test_the_five_copies_are_identical(self):
+        blocks = {}
+        for name in HELPER_COPIES:
+            text = (BIN / name).read_text(encoding="utf-8")
+            start = text.index("# --- layout helper:")
+            end = text.index("# --- end layout helper ---")
+            blocks[name] = text[start:end]
+        self.assertEqual(len(set(blocks.values())), 1, "layout helper copies differ: " + ", ".join(blocks))
+
+
+class LayoutFile(Project):
+    def test_read_from_the_given_folder_only(self):
+        for name in HELPER_COPIES:
+            mod = load(name)
+            self.assertEqual(mod.find_layout(self.root)[0], self.root, name)
+            self.assertIsNone(mod.find_layout(self.root / "draft")[0], name)  # no walk to the folder above
+
+    def test_windows_drive_and_root_forms_are_refused(self):
+        bad = ["C:x", "C:\\x", "C:/x", "\\Windows\\x", "/abs", "//server/share/x", "a/../b", "a\\..\\b"]
+        good = ["notes/lit", "notes\\lit", "x"]
+        for name in HELPER_COPIES:
+            mod = load(name)
+            for v in bad:
+                self.assertFalse(mod.plain_relative(v), f"{name}: {v!r} accepted")
+            for v in good:
+                self.assertTrue(mod.plain_relative(v), f"{name}: {v!r} refused")
+
+    def test_windows_drive_form_in_the_file_is_a_clear_error(self):
+        for v in ("C:x", "\\Windows\\x"):
+            (self.root / "provenote.json").write_text(json.dumps({"notes": v}), encoding="utf-8")
+            r = run("verify-quotes", str(self.note), cwd=self.root)
+            self.assertNotEqual(r.returncode, 0, r.stdout + r.stderr)
+            self.assertIn("bad layout entries", r.stderr)
+
+
 class VerifyQuotesLayout(Project):
     def test_custom_paths_pass(self):
-        r = run("verify-quotes", str(self.note))
+        r = run("verify-quotes", str(self.note), cwd=self.root)
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         self.assertIn("PASS", r.stdout)
+
+    def test_layout_file_in_a_folder_above_is_not_read(self):
+        r = run("verify-quotes", str(self.note), cwd=self.root / "draft")
+        self.assertNotEqual(r.returncode, 0, r.stdout + r.stderr)  # default layout: src/md is outside 02_sources/md
 
     def test_note_outside_notes_folder_fails_strict_naming_the_layout_path(self):
         other = self.root / "elsewhere"
         other.mkdir()
         n = other / "a.md"
         n.write_text(NOTE.format(src="src/md"), encoding="utf-8")
-        r = run("verify-quotes", "--strict", str(n))
+        r = run("verify-quotes", "--strict", str(n), cwd=self.root)
         self.assertEqual(r.returncode, 1)
         self.assertIn("notes/lit2", r.stdout)
 
@@ -80,7 +121,7 @@ class VerifyQuotesLayout(Project):
         (self.root / "02_sources/md").mkdir(parents=True)
         (self.root / "02_sources/md/a.md").write_text(SOURCE, encoding="utf-8")
         self.note.write_text(NOTE.format(src="02_sources/md"), encoding="utf-8")
-        r = run("verify-quotes", str(self.note))
+        r = run("verify-quotes", str(self.note), cwd=self.root)
         self.assertEqual(r.returncode, 1)
         self.assertIn("src/md", r.stdout)
 
@@ -90,15 +131,15 @@ class VerifyQuotesLayout(Project):
         (self.root / "src/md/a.md").write_text(text.replace("title: T", f"title: T\nmd_sha256: {digest}"), encoding="utf-8")
         mf = self.root / "src/files.csv"
         mf.write_text(f"stem,md_sha256\na,{digest}\n", encoding="utf-8")
-        self.assertEqual(run("verify-quotes", "--strict", str(self.note)).returncode, 0)
+        self.assertEqual(run("verify-quotes", "--strict", str(self.note), cwd=self.root).returncode, 0)
         mf.write_text("stem,md_sha256\na,deadbeef\n", encoding="utf-8")  # proves the layout manifest is read
-        r = run("verify-quotes", "--strict", str(self.note))
+        r = run("verify-quotes", "--strict", str(self.note), cwd=self.root)
         self.assertEqual(r.returncode, 1)
         self.assertIn("differs from the md front matter", r.stdout)
 
     def test_bad_layout_file_is_a_clear_error(self):
         (self.root / "provenote.json").write_text('{"notes": "/abs", "typo": "x"}', encoding="utf-8")
-        r = run("verify-quotes", str(self.note))
+        r = run("verify-quotes", str(self.note), cwd=self.root)
         self.assertNotEqual(r.returncode, 0)
         self.assertIn("bad layout entries", r.stderr)
 
@@ -109,25 +150,38 @@ class VerifyQuotesLayout(Project):
         (self.root / "02_sources/md/a.md").write_text(SOURCE, encoding="utf-8")
         n = self.root / "01_notes/lit/a.md"
         n.write_text(NOTE.format(src="02_sources/md"), encoding="utf-8")
-        self.assertEqual(run("verify-quotes", str(n)).returncode, 0)
+        self.assertEqual(run("verify-quotes", str(n), cwd=self.root).returncode, 0)
 
 
 class CheckClaimsLayout(Project):
     DRAFT = "Money evolved over many centuries [@a].\n"
 
+    def setUp(self):
+        super().setUp()
+        self.draft = self.root / "draft/paper.md"
+        self.draft.write_text(self.DRAFT, encoding="utf-8")
+
     def test_with_root(self):
-        d = self.root / "draft/paper.md"
-        d.write_text(self.DRAFT, encoding="utf-8")
-        r = run("check-claims", "--root", str(self.root), str(d), cwd=self.root)
+        r = run("check-claims", "--root", str(self.root), str(self.draft), cwd=self.root)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertIn(str(self.root / "notes/lit2"), r.stderr)
+
+    def test_root_pins_the_project_whatever_the_working_directory_holds(self):
+        other = self.root / "draft"  # its own provenote.json points at folders that do not exist
+        (other / "provenote.json").write_text(json.dumps({"notes": "nowhere", "sources_md": "nowhere"}),
+                                              encoding="utf-8")
+        r = run("check-claims", "--root", str(self.root), str(self.draft), cwd=other)
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         self.assertIn(str(self.root / "notes/lit2"), r.stderr)
 
     def test_without_root_finds_notes_through_the_layout_file(self):
-        d = self.root / "draft/paper.md"
-        d.write_text(self.DRAFT, encoding="utf-8")
-        r = run("check-claims", str(d), cwd=self.root)
+        r = run("check-claims", str(self.draft), cwd=self.root)
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         self.assertIn("lit2", r.stderr)
+
+    def test_without_root_a_layout_file_above_the_working_directory_is_not_read(self):
+        r = run("check-claims", str(self.draft), cwd=self.root / "draft")
+        self.assertNotIn("lit2", r.stderr, r.stdout + r.stderr)
 
 
 class Pdf2mdLayout(Project):
@@ -135,11 +189,20 @@ class Pdf2mdLayout(Project):
     def test_default_out_and_manifest_come_from_the_layout(self):
         pdf = self.root / "p.pdf"
         make_pdf(pdf, ["Alpha page one"])
-        r = run("pdf2md", str(pdf), "--threshold", "1", cwd=self.root / "draft")  # cwd below the layout file
+        r = run("pdf2md", str(pdf), "--threshold", "1", cwd=self.root)
         self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
         self.assertTrue((self.root / "src/md/p.md").is_file())
         self.assertTrue((self.root / "src/files.csv").is_file())
-        self.assertFalse((self.root / "draft/02_sources").exists())
+        self.assertFalse((self.root / "02_sources").exists())
+
+    @unittest.skipUnless(shutil.which("pdftotext"), "pdftotext not installed")
+    def test_layout_file_above_the_working_directory_is_not_read(self):
+        pdf = self.root / "p.pdf"
+        make_pdf(pdf, ["Alpha page one"])
+        r = run("pdf2md", str(pdf), "--threshold", "1", cwd=self.root / "draft")
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.assertTrue((self.root / "draft/02_sources/md/p.md").is_file())
+        self.assertFalse((self.root / "src/md/p.md").exists())
 
     @unittest.skipUnless(shutil.which("pdftotext"), "pdftotext not installed")
     def test_explicit_out_wins(self):
@@ -160,10 +223,17 @@ class LitSearchLayout(Project):
 
     def test_export_bib_default_comes_from_the_layout(self):
         ls = load("lit-search")
-        with chdir(self.root / "draft"), contextlib.redirect_stdout(io.StringIO()):
+        with chdir(self.root), contextlib.redirect_stdout(io.StringIO()):
             ls.main(["--export-bib", "10.1000/alpha"], fetch=self.fetch)
         self.assertIn("doi={10.1000/alpha}", (self.root / "refs/my.bib").read_text(encoding="utf-8"))
-        self.assertFalse((self.root / "draft/07_references").exists())
+        self.assertFalse((self.root / "07_references").exists())
+
+    def test_layout_file_above_the_working_directory_is_not_read(self):
+        ls = load("lit-search")
+        with chdir(self.root / "draft"), contextlib.redirect_stdout(io.StringIO()):
+            ls.main(["--export-bib", "10.1000/alpha"], fetch=self.fetch)
+        self.assertTrue((self.root / "draft/07_references/references.bib").is_file())
+        self.assertFalse((self.root / "refs/my.bib").exists())
 
     def test_explicit_bib_wins(self):
         ls = load("lit-search")
