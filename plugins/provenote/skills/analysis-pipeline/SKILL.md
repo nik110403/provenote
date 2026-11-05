@@ -19,6 +19,6 @@ Conventions:
 - Log with timestamps per step; the runner exits non-zero on the first failing step.
 - A figure or table title states the finding; notes make it self-contained.
 
-Link into the paper: link (symlink or copy-on-build), never hand-copy, the needed files from `output/figures/` and `output/tables/` into the project's `10_paper/` so the paper always shows the last pipeline run.
+Link into the paper: link (symlink or copy-on-build), never hand-copy, the needed files from `output/figures/` and `output/tables/` into the project's paper folder (layout `paper_dir`, default `10_paper/`) so the paper always shows the last pipeline run.
 
 Replication checklist: README with an exhibit-to-script table; environment lock file (`uv.lock` / `renv.lock`); raw-data manifest; licence; a rehearsed clean rebuild from a fresh clone.

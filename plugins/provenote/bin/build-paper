@@ -7,7 +7,49 @@ import shutil
 import subprocess
 import sys
 import zipfile
+import json
 from pathlib import Path
+
+
+# --- layout helper: keep identical in build-paper, check-bib, lit-search, pdf2md, verify-quotes ---
+# Optional layout file provenote.json in the project folder: keys below, paths relative to that folder.
+# No file: the default layout. Only the given folder's provenote.json is read, never one in a folder
+# above it. Unknown keys, absolute paths, Windows drive or root forms (C:x, \x) and ".." are refused.
+LAYOUT = {"notes": "01_notes/lit", "search": "01_notes/search", "sources_md": "02_sources/md",
+          "sources_pdf": "02_sources/pdf", "manifest": "02_sources/manifest.csv",
+          "bib": "07_references/references.bib", "paper_dir": "10_paper"}
+
+
+def plain_relative(v):
+    """v is a relative path on every platform: no drive (C:x), no root (/x, \\x), no '..' part."""
+    from pathlib import PureWindowsPath
+    w = PureWindowsPath(v)
+    return not (w.drive or w.root or Path(v).is_absolute() or ".." in w.parts)
+
+
+def find_layout(start="."):
+    """(start if it holds provenote.json else None, layout). Reads start/provenote.json only."""
+    d = Path(start).absolute()
+    f = d / "provenote.json"
+    if not f.is_file():
+        return None, dict(LAYOUT)
+    try:
+        data = json.loads(f.read_text(encoding="utf-8-sig"))
+    except (OSError, ValueError) as e:
+        raise SystemExit(f"{f}: cannot read layout file ({e})")
+    bad = [k for k, v in (data.items() if isinstance(data, dict) else [("<file>", None)])
+           if k not in LAYOUT or not isinstance(v, str) or not v.strip() or not plain_relative(v)]
+    if bad:
+        raise SystemExit(f"{f}: bad layout entries {bad}; allowed keys {sorted(LAYOUT)}, "
+                         "each a relative path without a drive, a leading slash or '..'")
+    return d, {**LAYOUT, **data}
+
+
+def layout_path(key, start="."):
+    """Path string for a layout key: relative as before without a layout file, else under its folder."""
+    base, lay = find_layout(start)
+    return str(base / lay[key]) if base else lay[key]
+# --- end layout helper ---
 
 
 def command_version(command):
@@ -38,7 +80,7 @@ def main():
                         help="DOCX style reference document (only with --to docx)")
     parser.add_argument("--grounding", action="store_true",
                         help="also run quote and citation checks; this is not full-draft proof")
-    parser.add_argument("paper_dir", nargs="?", default="10_paper")
+    parser.add_argument("paper_dir", nargs="?", help="paper folder (default: layout paper_dir, 10_paper)")
     args = parser.parse_args()
     if args.reference_doc and args.to != "docx":
         parser.error("--reference-doc is only supported with --to docx")
@@ -49,7 +91,8 @@ def main():
             parser.error(f"--reference-doc not found: {reference_doc}")
         if not reference_doc.is_file():
             parser.error(f"--reference-doc must be a file: {reference_doc}")
-    paper_dir = Path(args.paper_dir).resolve()
+    base, lay = find_layout(".")  # the current folder's provenote.json only, never one above
+    paper_dir = Path(args.paper_dir or layout_path("paper_dir")).resolve()
     paper = paper_dir / "paper.md"
     if not paper.is_file():
         parser.error(f"{paper} not found")
@@ -118,10 +161,10 @@ def main():
         if "???" in text:
             failures.append("??? found in paper.pdf")
     if args.grounding:
-        root = paper_dir.parent
-        notes = sorted((root / "01_notes/lit").glob("*.md"))
+        root = base or paper_dir.parent
+        notes = sorted((root / lay["notes"]).glob("*.md"))
         if not notes:
-            failures.append("grounding: no notes in 01_notes/lit")
+            failures.append(f"grounding: no notes in {lay['notes']}")
         else:
             for helper_args in (("verify-quotes", "--strict", *map(str, notes)),
                                 ("check-claims", "--root", str(root), str(paper))):

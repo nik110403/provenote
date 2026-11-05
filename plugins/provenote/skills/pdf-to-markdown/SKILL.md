@@ -17,7 +17,7 @@ doctor prints proposed fixes but never installs or changes anything. OCR and
 decryption tools are conditional on the input and are checked separately.
 
 ```
-pdf2md 02_sources/pdf/*.pdf --out 02_sources/md/
+pdf2md 02_sources/pdf/*.pdf      # --out defaults to layout sources_md (02_sources/md/)
 ```
 
 If `pdf2md` is not on PATH, run it from the kit's `plugins/provenote/bin/`.
@@ -34,7 +34,7 @@ What it does per PDF:
 2. Encrypted PDFs are decrypted with `qpdf` first.
 3. `--engine docling` is refused: Docling has no per-page output, so quote page pins would be wrong.
 4. Writes `<stem>.md` (LF newlines) with a YAML header (source name, sha256, pages, chars per page,
-   method, converter, `md_sha256`) and appends a row to `02_sources/manifest.csv`. `md_sha256` hashes
+   method, converter, `md_sha256`) and appends a row to the manifest (layout `manifest`, default `02_sources/manifest.csv`). `md_sha256` hashes
    the markdown body; `verify-quotes` recomputes it, so a hand-edited conversion fails verification.
    Re-convert with `--force` instead of editing the markdown. The hash guards against accidental edits,
    not a determined forger: the md and manifest sit next to each other in the project.

@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Convert PDFs to page-marked markdown, with OCR fallback for scanned files."""
+"""Convert PDFs to page-marked markdown, with OCR fallback for scanned files.
+
+Default output folder 02_sources/md and manifest 02_sources/manifest.csv, or the paths in
+provenote.json (layout keys sources_md, manifest). An explicit --out wins.
+"""
 import sys
 
 if sys.version_info < (3, 9):
@@ -14,6 +18,7 @@ import subprocess
 import sys
 import tempfile
 import unicodedata
+import json
 from pathlib import Path
 
 CONVERTER = "pdf2md 0.1.3"
@@ -23,6 +28,47 @@ MANIFEST_FIELDS = ["stem", "source", "sha256", "pages", "chars_per_page", "metho
 
 class ToolMissing(Exception):
     pass
+
+
+# --- layout helper: keep identical in build-paper, check-bib, lit-search, pdf2md, verify-quotes ---
+# Optional layout file provenote.json in the project folder: keys below, paths relative to that folder.
+# No file: the default layout. Only the given folder's provenote.json is read, never one in a folder
+# above it. Unknown keys, absolute paths, Windows drive or root forms (C:x, \x) and ".." are refused.
+LAYOUT = {"notes": "01_notes/lit", "search": "01_notes/search", "sources_md": "02_sources/md",
+          "sources_pdf": "02_sources/pdf", "manifest": "02_sources/manifest.csv",
+          "bib": "07_references/references.bib", "paper_dir": "10_paper"}
+
+
+def plain_relative(v):
+    """v is a relative path on every platform: no drive (C:x), no root (/x, \\x), no '..' part."""
+    from pathlib import PureWindowsPath
+    w = PureWindowsPath(v)
+    return not (w.drive or w.root or Path(v).is_absolute() or ".." in w.parts)
+
+
+def find_layout(start="."):
+    """(start if it holds provenote.json else None, layout). Reads start/provenote.json only."""
+    d = Path(start).absolute()
+    f = d / "provenote.json"
+    if not f.is_file():
+        return None, dict(LAYOUT)
+    try:
+        data = json.loads(f.read_text(encoding="utf-8-sig"))
+    except (OSError, ValueError) as e:
+        raise SystemExit(f"{f}: cannot read layout file ({e})")
+    bad = [k for k, v in (data.items() if isinstance(data, dict) else [("<file>", None)])
+           if k not in LAYOUT or not isinstance(v, str) or not v.strip() or not plain_relative(v)]
+    if bad:
+        raise SystemExit(f"{f}: bad layout entries {bad}; allowed keys {sorted(LAYOUT)}, "
+                         "each a relative path without a drive, a leading slash or '..'")
+    return d, {**LAYOUT, **data}
+
+
+def layout_path(key, start="."):
+    """Path string for a layout key: relative as before without a layout file, else under its folder."""
+    base, lay = find_layout(start)
+    return str(base / lay[key]) if base else lay[key]
+# --- end layout helper ---
 
 
 def find_pdftotext():
@@ -149,7 +195,7 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, epilog=(
         "Requires: python3 >= 3.9, pdftotext (poppler). Optional: ocrmypdf (scans), qpdf (encrypted)."))
     ap.add_argument("pdfs", nargs="+")
-    ap.add_argument("--out", default="02_sources/md")
+    ap.add_argument("--out", help="output folder (default: layout sources_md, 02_sources/md)")
     ap.add_argument("--threshold", type=int, default=200, help="min mean chars/page before OCR")
     ap.add_argument("--engine", choices=["auto", "docling"], default="auto",
                     help="docling is refused: it has no per-page output, so page pins would be wrong")
@@ -160,9 +206,10 @@ def main(argv=None):
         print("error: --engine docling is not supported: it does not produce per-page output, "
               "so quote page pins would be wrong", file=sys.stderr)
         return 1
-    out = Path(a.out)
+    out = Path(a.out or layout_path("sources_md"))
     out.mkdir(parents=True, exist_ok=True)
-    manifest = out.parent / "manifest.csv"
+    manifest = out.parent / "manifest.csv" if a.out else Path(layout_path("manifest"))
+    manifest.parent.mkdir(parents=True, exist_ok=True)
     status = 0
     for p in a.pdfs:
         pdf = Path(p)
